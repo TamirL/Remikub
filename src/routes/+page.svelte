@@ -1,23 +1,17 @@
 <script lang="ts">
 	import Header from './Header.svelte';
 	import { setCardSizeContext } from '../domain/card';
-	import Board from '../components/Board.svelte';
-	import UserCards from '../components/UserCards.svelte';
-	import { createDeck } from '../domain/deck';
+	import Game from './Game.svelte';
 
 	setCardSizeContext({
 		width: '30px',
 		height: '40px'
 	});
-
-	const deck = $state(createDeck());
-	const userCards = $derived(deck.slice(0, 14));
 </script>
 
 <div class="main">
 	<Header />
-	<Board />
-	<UserCards cards={userCards} />
+	<Game />
 </div>
 
 <style>

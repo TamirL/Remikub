@@ -74,6 +74,18 @@ export function getCardSizeContext() {
     return getContext('CardSize') as CardSize;
 }
 
+type CardDragDropContextData = {
+    draggedCard: RealCardData | null;
+}
+
+export function setCardDragDropContext(dragDropInitialContext: CardDragDropContextData) {
+    setContext('CardDragDrop', dragDropInitialContext);
+}
+
+export function getCardDragDropContext(): CardDragDropContextData {
+    return getContext('CardDragDrop') as CardDragDropContextData;
+}
+
 export function canPutRealCardOnSlot(realCard: RealCardData, cardSlot: NumberCardData) {
     switch (realCard.type) {
         case 'number':
