@@ -89,7 +89,7 @@ export function getCardDragDropContext(): CardDragDropContextData {
 export function canPutRealCardOnSlot(realCard: RealCardData, cardSlot: NumberCardData) {
     switch (realCard.type) {
         case 'number':
-            return realCard.color === cardSlot.color && realCard.numericValue === (cardSlot as NumberCardData).numericValue;
+            return realCard.color === cardSlot.color && realCard.numericValue === cardSlot.numericValue;
         case 'joker':
             return true;
     }
