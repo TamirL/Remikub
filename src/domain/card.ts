@@ -74,25 +74,14 @@ export function getCardSizeContext() {
     return getContext('CardSize') as CardSize;
 }
 
-export function setCardDataOnDragDropEvent(event: DragEvent, data: CardData) {
-    if (event.dataTransfer === null) {
-        throw new Error('Drag event data transfer is null');
+export function canPutRealCardOnSlot(realCard: RealCardData, cardSlot: NumberCardData) {
+    switch (realCard.type) {
+        case 'number':
+            return realCard.color === cardSlot.color && realCard.numericValue === (cardSlot as NumberCardData).numericValue;
+        case 'joker':
+            return true;
     }
-
-    const cardDataJson = JSON.stringify(data);
-    event.dataTransfer.setData('text/plain', cardDataJson);
 }
-
-export function getCardDataFromDragDropEvent(event: DragEvent) {
-    if (event.dataTransfer === null) {
-        throw new Error('Drag event data transfer is null');
-    }
-
-    const json = event.dataTransfer.getData("text/plain");
-    const data = JSON.parse(json);
-    return data as CardData;
-}
-
 
 export function isCardsEqual(card1: CardData | null, card2: CardData | null) {
     if (card1 === null && card2 === null) {

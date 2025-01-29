@@ -1,18 +1,18 @@
 <script lang="ts">
-	import { setCardDataOnDragDropEvent, type RealCardData } from '../../domain/card';
+	import { type RealCardData } from '../../domain/card';
+	import { currentlyDraggedCardState } from '../../stores/dragdropStore.svelte';
 	import Card from './Card.svelte';
 
 	let { cardData }: { cardData: RealCardData } = $props();
 
 	let isDragging = $state(false);
 
-	console.log($state.snapshot(isDragging), cardData);
-
 	function onDragStart(event: DragEvent) {
 		try {
-			console.log('onDragStart', cardData);
 			isDragging = true;
-			setCardDataOnDragDropEvent(event, $state.snapshot(cardData));
+			const cardDataSnapshot = $state.snapshot(cardData);
+			console.log('onDragStart', cardDataSnapshot);
+			currentlyDraggedCardState.draggedCard = cardDataSnapshot;
 		} catch (error) {
 			console.error('onDragStart', error);
 		}
@@ -20,7 +20,8 @@
 
 	function onDragEnd(event: DragEvent) {
 		try {
-			console.log('onDragEnd', cardData);
+			console.log('onDragEnd', $state.snapshot(cardData));
+			currentlyDraggedCardState.draggedCard = null;
 			isDragging = false;
 		} catch (error) {
 			console.error('onDragEnd', error);
