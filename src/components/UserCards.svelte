@@ -1,13 +1,13 @@
 <script lang="ts">
-	import type { CardData } from '../domain/card';
-	import Card from './Card.svelte';
+	import type { RealCardData } from '../domain/card';
+	import DragabbleCard from './card/DragabbleCard.svelte';
 
-	let { cards }: { cards: CardData[] } = $props();
+	let { cards }: { cards: RealCardData[] } = $props();
 </script>
 
 <div class="user-cards">
 	{#each cards as card}
-		<Card cardData={card} isDraggable={true} />
+		<DragabbleCard cardData={card} />
 	{/each}
 </div>
 

@@ -1,23 +1,16 @@
 <script lang="ts">
 	import type { CardSlotData } from '../domain/board';
-	import { getCardDragDropContext, isCardsEqual, type CardData } from '../domain/card';
-	import Card from './Card.svelte';
+	import Card from './card/Card.svelte';
 
-	const { slot }: { slot: CardSlotData } = $props();
-
-	const currentDraggedCard = getCardDragDropContext();
-
-	let isDragged = $derived(isCardsEqual(currentDraggedCard, slot.card ?? slot.expectedCard));
-
-	isDragged && console.log('isDragged', $state.snapshot(isDragged), currentDraggedCard);
+	const { slot, highlight }: { slot: CardSlotData; highlight: boolean } = $props();
 </script>
 
-<div class={currentDraggedCard ? 'dragged' : ''} style:opacity={slot.card ? 1 : 0.2}>
-	<Card cardData={slot.card ?? slot.expectedCard} isDraggable={slot.card ? false : true} />
+<div class={highlight ? 'highlighted' : ''} style:opacity={slot.card ? 1 : 0.2}>
+	<Card cardData={slot.card ?? slot.expectedCard} />
 </div>
 
 <style>
-	.dragged {
+	.highlighted {
 		border: 2px solid yellow;
 	}
 </style>

@@ -4,23 +4,36 @@ export type CardType = 'number' | 'joker';
 export type NumberCardColor = 'red' | 'blue' | 'yellow' | 'black';
 export type JokerCardColor = 'red' | 'black';
 
-export type NumberCardData = {
+type BaseCardData = {
+    type: CardType;
+}
+
+export type NumberCardData = BaseCardData & {
     type: 'number';
     color: NumberCardColor;
     numericValue: number;
 };
 
-export type JokerCardData = {
+type BaseRealCardData = {
+    id: number;
+}
+
+export type RealNumberCardData = NumberCardData & BaseRealCardData & {
+};
+
+export type RealJokerCardData = BaseCardData & BaseRealCardData & {
     type: 'joker';
     color: JokerCardColor;
 };
 
-export type CardData = NumberCardData | JokerCardData;
+export type RealCardData = RealNumberCardData | RealJokerCardData
+export type CardData = NumberCardData | RealCardData;
 
 export function getCssCardColor(cardData: CardData) {
     switch (cardData.type) {
         case 'number':
             return getNumberCardColorForCss(cardData.color);
+
         case 'joker':
             return getJokerCardColorForCss(cardData.color);
     }
@@ -61,13 +74,25 @@ export function getCardSizeContext() {
     return getContext('CardSize') as CardSize;
 }
 
-export function setCardDragDropContext(card: CardData | null) {
-    setContext('CardDragDrop', card);
+export function setCardDataOnDragDropEvent(event: DragEvent, data: CardData) {
+    if (event.dataTransfer === null) {
+        throw new Error('Drag event data transfer is null');
+    }
+
+    const cardDataJson = JSON.stringify(data);
+    event.dataTransfer.setData('text/plain', cardDataJson);
 }
 
-export function getCardDragDropContext() {
-    return (getContext('CardDragDrop') ?? null) as CardData | null;
+export function getCardDataFromDragDropEvent(event: DragEvent) {
+    if (event.dataTransfer === null) {
+        throw new Error('Drag event data transfer is null');
+    }
+
+    const json = event.dataTransfer.getData("text/plain");
+    const data = JSON.parse(json);
+    return data as CardData;
 }
+
 
 export function isCardsEqual(card1: CardData | null, card2: CardData | null) {
     if (card1 === null && card2 === null) {

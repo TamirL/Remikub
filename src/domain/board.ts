@@ -1,8 +1,10 @@
-import type { CardData, NumberCardColor, NumberCardData } from "./card";
+import type { CardData, NumberCardColor, NumberCardData, RealCardData } from "./card";
+
+
 
 export type CardSlotData = {
     expectedCard: NumberCardData;
-    card: CardData | null;
+    card: RealCardData | null;
 }
 
 type CardSet = { numericValue: number; slots: CardSlotData[] };
