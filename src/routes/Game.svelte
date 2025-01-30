@@ -3,17 +3,31 @@
 	import Board from '../components/Board.svelte';
 	import UserCards from '../components/UserCards.svelte';
 	import { createDeck } from '../domain/deck';
-
-	const dragDropContext = $state({ draggedCard: null });
+	import GameManager from '../domain/managers/gameManager.svelte';
+	import { createEmptyBoard } from '../domain/board';
+	import DeckManager from '../domain/managers/deckManager.svelte';
+	import { setGameContext } from '../domain/game';
+	import UserCardsManager from '../domain/managers/userCardsManager.svelte';
+	import BoardManager from '../domain/managers/boardManager.svelte';
+	const dragDropContext = $state({ draggedCard: null, draggedFrom: null });
 	setCardDragDropContext(dragDropContext);
 
-	const deck = $state(createDeck());
-	const userCards = $derived(deck.slice(0, 14));
+	const deck = createDeck();
+	const userCards = deck.slice(0, 14);
+	const deckManager = new DeckManager(deck);
+	const boardManager = new BoardManager(createEmptyBoard());
+	const userCardsManager = new UserCardsManager(userCards);
+	const gameManager = $state({
+		gameManager: new GameManager(deckManager, boardManager, userCardsManager),
+		boardManager,
+		userCardsManager
+	});
+	setGameContext(gameManager);
 </script>
 
 <div>
 	<Board />
-	<UserCards cards={userCards} />
+	<UserCards cards={userCardsManager.userCards} />
 </div>
 
 <style>

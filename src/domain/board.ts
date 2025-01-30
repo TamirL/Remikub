@@ -10,13 +10,7 @@ export type CardSlotData = {
 type CardSet = { numericValue: number; slots: CardSlotData[] };
 type CardRun = { color: NumberCardColor; slots: CardSlotData[] };
 
-type Board = {
-    sets: CardSet[];
-    allRuns: CardRun[];
-}
-
-
-function createEmptyBoardSet(numericValue: number): CardSet {
+function createEmptySetSlots(numericValue: number): CardSet {
     return {
         numericValue,
         slots: [
@@ -28,7 +22,7 @@ function createEmptyBoardSet(numericValue: number): CardSet {
     };
 }
 
-function createRun(color: NumberCardColor): CardRun {
+function createRunEmptySlots(color: NumberCardColor): CardRun {
     return {
         color: color,
         slots: Array.from({ length: 13 }, (_, i) => ({
@@ -38,17 +32,24 @@ function createRun(color: NumberCardColor): CardRun {
     };
 }
 
-export const emptyBoard: Board = {
-    sets: Array.from({ length: 13 }, (_, i) => ([createEmptyBoardSet(i + 1), createEmptyBoardSet(i + 1)])).flat(),
-    allRuns: [
-        createRun('yellow'),
-        createRun('yellow'),
-        createRun('blue'),
-        createRun('blue'),
-        createRun('red'),
-        createRun('red'),
-        createRun('black'),
-        createRun('black')
-    ]
+export type Board = {
+    sets: CardSet[];
+    allRuns: CardRun[];
+}
+
+export function createEmptyBoard(): Board {
+    return {
+        sets: Array.from({ length: 13 }, (_, i) => ([createEmptySetSlots(i + 1), createEmptySetSlots(i + 1)])).flat(),
+        allRuns: [
+            createRunEmptySlots('yellow'),
+            createRunEmptySlots('yellow'),
+            createRunEmptySlots('blue'),
+            createRunEmptySlots('blue'),
+            createRunEmptySlots('red'),
+            createRunEmptySlots('red'),
+            createRunEmptySlots('black'),
+            createRunEmptySlots('black')
+        ]
+    };
 }
 

@@ -1,28 +1,23 @@
 <script lang="ts">
+	import type { CardSlotData } from '../../domain/board';
 	import { getCardDragDropContext, type RealCardData } from '../../domain/card';
 	import Card from './Card.svelte';
 
-	let { cardData }: { cardData: RealCardData } = $props();
+	let { cardData, draggedFrom }: { cardData: RealCardData, draggedFrom: CardSlotData | null } = $props();
 
 	let isDragging = $state(false);
 	let currentDraggedCard = getCardDragDropContext();
 
 	function onDragStart(event: DragEvent) {
-		try {
-			isDragging = true;
-			currentDraggedCard.draggedCard = cardData;
-		} catch (error) {
-			console.error('onDragStart', error);
-		}
+		isDragging = true;
+		currentDraggedCard.draggedCard = cardData;
+		currentDraggedCard.draggedFrom = draggedFrom;
 	}
 
 	function onDragEnd(event: DragEvent) {
-		try {
-			currentDraggedCard.draggedCard = null;
-			isDragging = false;
-		} catch (error) {
-			console.error('onDragEnd', error);
-		}
+		currentDraggedCard.draggedCard = null;
+		currentDraggedCard.draggedFrom = null;
+		isDragging = false;
 	}
 </script>
 

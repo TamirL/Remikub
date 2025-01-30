@@ -1,10 +1,10 @@
 <script lang="ts">
 	import type { CardSlotData } from '../domain/board';
-	import { emptyBoard } from '../domain/board';
 	import { canPutRealCardOnSlot, getCardDragDropContext, type RealCardData } from '../domain/card';
+	import { getGameContext } from '../domain/game';
 	import CardSlot from './card/CardSlot.svelte';
 
-	let board = emptyBoard;
+	let board = getGameContext().boardManager.board;
 	const dragDropContext = getCardDragDropContext();
 
 	function onDragOver(event: DragEvent) {
@@ -35,6 +35,7 @@
 			<CardSlot
 				{slot}
 				highlight={!!currentDraggedCard &&
+					(!slot.card || currentDraggedCard.id === slot.card?.id) &&
 					canPutRealCardOnSlot(currentDraggedCard, slot.expectedCard)}
 			/>
 		{/each}

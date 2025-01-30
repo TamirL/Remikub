@@ -1,4 +1,5 @@
 import { getContext, setContext } from "svelte";
+import type { CardSlotData } from "./board";
 
 export type CardType = 'number' | 'joker';
 export type NumberCardColor = 'red' | 'blue' | 'yellow' | 'black';
@@ -76,6 +77,7 @@ export function getCardSizeContext() {
 
 type CardDragDropContextData = {
     draggedCard: RealCardData | null;
+    draggedFrom: CardSlotData | null;
 }
 
 export function setCardDragDropContext(dragDropInitialContext: CardDragDropContextData) {

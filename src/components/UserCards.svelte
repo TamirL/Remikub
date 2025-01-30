@@ -2,12 +2,12 @@
 	import type { RealCardData } from '../domain/card';
 	import DragabbleCard from './card/DragabbleCard.svelte';
 
-	let { cards }: { cards: RealCardData[] } = $props();
+	let { cards }: { cards: readonly RealCardData[] } = $props();
 </script>
 
 <div class="user-cards">
-	{#each cards as card}
-		<DragabbleCard cardData={card} />
+	{#each cards as card (card.id)}
+		<DragabbleCard cardData={card} draggedFrom={null} />
 	{/each}
 </div>
 
