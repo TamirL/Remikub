@@ -2,14 +2,18 @@ import type { CardSlotData } from "../board";
 import type { RealCardData } from "../card";
 
 class DeckManager {
-    private deck: RealCardData[] = $state([]);
+    private _deck: RealCardData[] = $state([]);
 
     constructor(deck: RealCardData[]) {
-        this.deck = deck;
+        this._deck = deck;
+    }
+
+    get deck(): readonly RealCardData[] {
+        return this._deck;
     }
 
     drawCard(): RealCardData {
-        const newCardFromDeck = this.deck.shift();
+        const newCardFromDeck = this._deck.shift();
 
         if (!newCardFromDeck) {
             throw new Error('Deck is empty');

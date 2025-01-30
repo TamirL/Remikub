@@ -13,14 +13,15 @@
 	setCardDragDropContext(dragDropContext);
 
 	const deck = createDeck();
-	const userCards = deck.slice(0, 14);
+	const userCards = deck.splice(0, 14);
 	const deckManager = new DeckManager(deck);
 	const boardManager = new BoardManager(createEmptyBoard());
 	const userCardsManager = new UserCardsManager(userCards);
 	const gameManager = $state({
 		gameManager: new GameManager(deckManager, boardManager, userCardsManager),
 		boardManager,
-		userCardsManager
+		userCardsManager,
+		deckManager
 	});
 	setGameContext(gameManager);
 </script>

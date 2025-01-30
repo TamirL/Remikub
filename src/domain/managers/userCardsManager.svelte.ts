@@ -11,8 +11,12 @@ class UserCardsManager {
         return this._userCards;
     }
 
-    removeCardFromUserCards(card: RealCardData): void {
+    removeCard(card: RealCardData): void {
         this._userCards = this._userCards.filter(userCard => userCard.id !== card.id);
+    }
+
+    addCard(drawnCard: RealCardData) {
+        this._userCards.push(drawnCard);
     }
 }
 

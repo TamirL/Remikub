@@ -32,6 +32,7 @@
 	@container card (min-width: 0) {
 		.card-content {
 			font-size: 80cqmin;
+			font-weight: 500;
 		}
 	}
 </style>

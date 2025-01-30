@@ -37,9 +37,15 @@ class Game {
             return false;
         }
 
-        this.userCardsManager.removeCardFromUserCards(card);
+        this.userCardsManager.removeCard(card);
         to.card = card;
         return true;
+    }
+
+    drawCardFromDeck(): RealCardData {
+        const drawnCard = this.deckManager.drawCard();
+        this.userCardsManager.addCard(drawnCard);
+        return drawnCard;
     }
 }
 
