@@ -5,7 +5,6 @@
 	import CardSlot from './card/CardSlot.svelte';
 
 	let board = getGameContext().boardManager.board;
-	const dragDropContext = getCardDragDropContext();
 
 	function onDragOver(event: DragEvent) {
 		event.preventDefault();
@@ -19,25 +18,20 @@
 <div class="board-main" role="region" ondragover={onDragOver} ondrop={onDrop}>
 	<div class="board-sets">
 		{#each board.sets as set}
-			{@render seriesOfSlots(set.slots, dragDropContext.draggedCard)}
+			{@render seriesOfSlots(set.slots)}
 		{/each}
 	</div>
 	<div class="board-runs">
 		{#each board.allRuns as run}
-			{@render seriesOfSlots(run.slots, dragDropContext.draggedCard)}
+			{@render seriesOfSlots(run.slots)}
 		{/each}
 	</div>
 </div>
 
-{#snippet seriesOfSlots(slots: CardSlotData[], currentDraggedCard: RealCardData | null)}
+{#snippet seriesOfSlots(slots: CardSlotData[])}
 	<div class="board-series">
 		{#each slots as slot}
-			<CardSlot
-				{slot}
-				highlight={!!currentDraggedCard &&
-					(!slot.card || currentDraggedCard.id === slot.card?.id) &&
-					canPutRealCardOnSlot(currentDraggedCard, slot.expectedCard)}
-			/>
+			<CardSlot {slot} />
 		{/each}
 	</div>
 {/snippet}
