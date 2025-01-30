@@ -5,6 +5,7 @@
 	import CardSlot from './card/CardSlot.svelte';
 
 	let board = getGameContext().boardManager.board;
+	let boardManager = getGameContext().boardManager;
 
 	function onDragOver(event: DragEvent) {
 		event.preventDefault();
@@ -15,7 +16,12 @@
 	}
 </script>
 
-<div class="board-main" role="region" ondragover={onDragOver} ondrop={onDrop}>
+<div
+	class={['board-main', boardManager.isBoardValid ? 'valid' : 'invalid']}
+	role="region"
+	ondragover={onDragOver}
+	ondrop={onDrop}
+>
 	<div class="board-sets">
 		{#each board.sets as set}
 			{@render seriesOfSlots(set.slots)}
@@ -48,6 +54,14 @@
 		padding: 20px;
 		overflow: auto;
 		min-height: 0;
+	}
+
+	.board-main.valid {
+		background-color: #222222;
+	}
+
+	.board-main.invalid {
+		background-color: #441313;
 	}
 
 	.board-sets {

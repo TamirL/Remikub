@@ -7,8 +7,8 @@ export type CardSlotData = {
     card: RealCardData | null;
 }
 
-type CardSet = { numericValue: number; slots: CardSlotData[] };
-type CardRun = { color: NumberCardColor; slots: CardSlotData[] };
+export type CardSet = { numericValue: number; slots: CardSlotData[] };
+export type CardRun = { color: NumberCardColor; slots: CardSlotData[] };
 
 function createEmptySetSlots(numericValue: number): CardSet {
     return {
