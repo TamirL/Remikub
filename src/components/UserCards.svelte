@@ -2,6 +2,8 @@
 	import type { RealCardData } from '../domain/card';
 	import DragabbleCard from './card/DragabbleCard.svelte';
 	import DrawCardButton from './DrawCardButton.svelte';
+	import OrderByColorButton from './OrderByColorButton.svelte';
+	import OrderByNumberButton from './OrderByNumberButton.svelte';
 
 	let { cards }: { cards: readonly RealCardData[] } = $props();
 </script>
@@ -12,7 +14,11 @@
 			<DragabbleCard cardData={card} draggedFrom={null} />
 		{/each}
 	</div>
-	<div class="user-cards-button">
+	<div class="user-cards-buttons">
+		<div class="user-cards-order-buttons">
+			<OrderByNumberButton />
+			<OrderByColorButton />
+		</div>
 		<DrawCardButton />
 	</div>
 </div>
@@ -35,7 +41,9 @@
 		flex: 1;
 	}
 
-	.user-cards-button {
+	.user-cards-buttons {
 		flex: 0 0 auto;
+		display: flex;
+		flex-direction: row;
 	}
 </style>

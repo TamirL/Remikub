@@ -4,9 +4,9 @@
 
 	const gameContext = getGameContext();
 
-	function drawCard() {
-		gameContext.gameManager.drawCardFromDeck();
+	function orderByNumber() {
+		gameContext.userCardsManager.orderByValue();
 	}
 </script>
 
-<Button onclick={drawCard}>Draw Card - {gameContext.deckManager.deck.length}</Button>
+<Button onclick={orderByNumber}>333</Button>
