@@ -1,14 +1,10 @@
+import { createIdGenerator } from "../utils/idGenerator";
 import type { CardData, RealCardData, RealJokerCardData, RealNumberCardData } from "./card";
-
-function createIdGenerator(): () => number {
-    let nextId = 1;
-    return () => nextId++;
-}
 
 const idGenerator = createIdGenerator();
 
 const allNumberCards: RealNumberCardData[] = [
-    // First set
+    // First number group
     ...[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].flatMap((numericValue): RealNumberCardData[] => [
         { type: 'number', id: idGenerator(), numericValue, color: 'yellow' },
         { type: 'number', id: idGenerator(), numericValue, color: 'yellow' },

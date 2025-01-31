@@ -1,17 +1,19 @@
+import { createIdGenerator } from "../utils/idGenerator";
 import type { CardData, NumberCardColor, NumberCardData, RealCardData } from "./card";
-
-
 
 export type CardSlotData = {
     expectedCard: NumberCardData;
     card: RealCardData | null;
 }
 
-export type CardSet = { numericValue: number; slots: CardSlotData[] };
-export type CardRun = { color: NumberCardColor; slots: CardSlotData[] };
+export type CardNumberGroup = { id: number; numericValue: number; slots: CardSlotData[] };
+export type CardRun = { id: number; color: NumberCardColor; slots: CardSlotData[] };
 
-function createEmptySetSlots(numericValue: number): CardSet {
+const setIdGenerator = createIdGenerator();
+
+function createEmptyNumberGroupSlots(id: number, numericValue: number): CardNumberGroup {
     return {
+        id,
         numericValue,
         slots: [
             { expectedCard: { type: 'number', color: 'yellow', numericValue }, card: null },
@@ -22,8 +24,9 @@ function createEmptySetSlots(numericValue: number): CardSet {
     };
 }
 
-function createRunEmptySlots(color: NumberCardColor): CardRun {
+function createRunEmptySlots(id: number, color: NumberCardColor): CardRun {
     return {
+        id,
         color: color,
         slots: Array.from({ length: 13 }, (_, i) => ({
             expectedCard: { type: 'number', color, numericValue: i + 1 },
@@ -33,23 +36,29 @@ function createRunEmptySlots(color: NumberCardColor): CardRun {
 }
 
 export type Board = {
-    sets: CardSet[];
-    allRuns: CardRun[];
+    numberGroups: CardNumberGroup[];
+    runs: CardRun[];
+}
+
+export type VisibilityOf<T> = T & { isVisible: boolean };
+
+export type BoardWithVisibility = {
+    numberGroups: VisibilityOf<CardNumberGroup>[];
+    runs: VisibilityOf<CardRun>[];
 }
 
 export function createEmptyBoard(): Board {
     return {
-        sets: Array.from({ length: 13 }, (_, i) => ([createEmptySetSlots(i + 1), createEmptySetSlots(i + 1)])).flat(),
-        allRuns: [
-            createRunEmptySlots('yellow'),
-            createRunEmptySlots('yellow'),
-            createRunEmptySlots('blue'),
-            createRunEmptySlots('blue'),
-            createRunEmptySlots('red'),
-            createRunEmptySlots('red'),
-            createRunEmptySlots('black'),
-            createRunEmptySlots('black')
+        numberGroups: Array.from({ length: 13 }, (_, i) => ([createEmptyNumberGroupSlots(setIdGenerator(), i + 1), createEmptyNumberGroupSlots(setIdGenerator(), i + 1)])).flat(),
+        runs: [
+            createRunEmptySlots(setIdGenerator(), 'yellow'),
+            createRunEmptySlots(setIdGenerator(), 'yellow'),
+            createRunEmptySlots(setIdGenerator(), 'blue'),
+            createRunEmptySlots(setIdGenerator(), 'blue'),
+            createRunEmptySlots(setIdGenerator(), 'red'),
+            createRunEmptySlots(setIdGenerator(), 'red'),
+            createRunEmptySlots(setIdGenerator(), 'black'),
+            createRunEmptySlots(setIdGenerator(), 'black')
         ]
     };
 }
-

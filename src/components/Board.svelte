@@ -4,7 +4,10 @@
 	import { getGameContext } from '../domain/game';
 	import CardSlot from './card/CardSlot.svelte';
 
-	let board = getGameContext().boardManager.board;
+	const minimalVisibleBoard = $derived(
+		getGameContext().boardManager.getMinimalVisibleBoard(getCardDragDropContext().draggedCard)
+	);
+
 	let boardManager = getGameContext().boardManager;
 
 	function onDragOver(event: DragEvent) {
@@ -22,20 +25,20 @@
 	ondragover={onDragOver}
 	ondrop={onDrop}
 >
-	<div class="board-sets">
-		{#each board.sets as set}
-			{@render seriesOfSlots(set.slots)}
+	<div class="board-number-groups">
+		{#each minimalVisibleBoard.numberGroups as numberGroup (numberGroup.id)}
+			{@render seriesOfSlots(numberGroup.slots)}
 		{/each}
 	</div>
 	<div class="board-runs">
-		{#each board.allRuns as run}
+		{#each minimalVisibleBoard.runs as run (run.id)}
 			{@render seriesOfSlots(run.slots)}
 		{/each}
 	</div>
 </div>
 
 {#snippet seriesOfSlots(slots: CardSlotData[])}
-	<div class="board-series">
+	<div class="board-set">
 		{#each slots as slot}
 			<CardSlot {slot} />
 		{/each}
@@ -64,7 +67,7 @@
 		background-color: #441313;
 	}
 
-	.board-sets {
+	.board-number-groups {
 		display: flex;
 		flex-direction: column;
 		gap: 9px 14px;
@@ -80,7 +83,7 @@
 		gap: 9px;
 	}
 
-	.board-series {
+	.board-set {
 		display: flex;
 		flex-direction: row;
 		gap: 1px;

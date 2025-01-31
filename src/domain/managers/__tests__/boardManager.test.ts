@@ -6,17 +6,18 @@ describe('BoardManager.isRunValid', () => {
     let boardManager: BoardManager;
 
     beforeEach(() => {
-        boardManager = new BoardManager({ allRuns: [], sets: [] });
+        boardManager = new BoardManager({ runs: [], numberGroups: [] });
     });
 
     // Helper function to create a run with a pattern of filled/empty slots
     function createTestRun(pattern: boolean[]): CardRun {
         return {
+            id: 1,
             color: 'yellow',
-            slots: pattern.map(hasCard => ({
-                card: hasCard ? { type: 'number', id: 1, color: 'yellow', numericValue: 1 } : null,
-                expectedCard: { type: 'number', color: 'yellow', numericValue: 1 }
-            }))
+            slots: pattern.map((hasCard, index) => ({
+                card: hasCard ? { type: 'number', id: index + 1, color: 'yellow', numericValue: index + 1 } : null,
+                expectedCard: { type: 'number', color: 'yellow', numericValue: index + 1 }
+            })),
         };
     }
 
@@ -25,22 +26,22 @@ describe('BoardManager.isRunValid', () => {
         expect(BoardManager.isRunValid(run)).toBe(true);
     });
 
-    it('should return true for a single sequence of 3 cards', () => {
+    it('should return true for a single set of 3 cards', () => {
         const run = createTestRun([true, true, true]);
         expect(BoardManager.isRunValid(run)).toBe(true);
     });
 
-    it('should return true for a single sequence of more than 3 cards', () => {
+    it('should return true for a single set of more than 3 cards', () => {
         const run = createTestRun([true, true, true, true, true]);
         expect(BoardManager.isRunValid(run)).toBe(true);
     });
 
-    it('should return false for a sequence of 2 cards', () => {
+    it('should return false for a set of 2 cards', () => {
         const run = createTestRun([true, true]);
         expect(BoardManager.isRunValid(run)).toBe(false);
     });
 
-    it('should return true for multiple valid sequences separated by gaps', () => {
+    it('should return true for multiple valid sets separated by gaps', () => {
         const run = createTestRun([
             true, true, true, false, false,
             true, true, true, true
@@ -48,19 +49,19 @@ describe('BoardManager.isRunValid', () => {
         expect(BoardManager.isRunValid(run)).toBe(true);
     });
 
-    it('should return false if there is an invalid sequence in the middle', () => {
+    it('should return false if there is an invalid set in the middle', () => {
         const run = createTestRun([
             true, true, true, false,
-            true, true, // Invalid sequence of 2
+            true, true, // Invalid set of 2
             false, true, true, true
         ]);
         expect(BoardManager.isRunValid(run)).toBe(false);
     });
 
-    it('should return false if there is an invalid sequence at the end', () => {
+    it('should return false if there is an invalid set at the end', () => {
         const run = createTestRun([
             true, true, true, false,
-            true, true // Invalid sequence of 2 at the end
+            true, true // Invalid set of 2 at the end
         ]);
         expect(BoardManager.isRunValid(run)).toBe(false);
     });
