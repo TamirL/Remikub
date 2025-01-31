@@ -26,7 +26,7 @@
 </script>
 
 <div
-	class={isDragging ? 'dragging' : ''}
+	class={['draggable', isDragging ? 'dragging' : '']}
 	role="listitem"
 	draggable={true}
 	ondragstart={onDragStart}
@@ -36,6 +36,13 @@
 </div>
 
 <style>
+	.draggable {
+		cursor: grab;
+
+		/* This is a hack to make the card not have the red background when dragging, 
+		   this works because it creates a new stacking context */
+		translate: 0px 0px;
+	}
 	.dragging {
 		opacity: 0.5;
 	}
