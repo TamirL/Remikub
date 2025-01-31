@@ -32,28 +32,21 @@ class BoardManager {
         }).sort(compare.byField(numberGroup => numberGroup.id, compare.numbers()));
     }
 
-    private static calcWhichNumberGroupsOfTheSameNumberToShow(num: number, slotSets: CardNumberGroup[], card: RealCardData | null): CardNumberGroup[] {
-        const slotsThatHaveSomeCard = slotSets.filter(slotSet => slotSet.slots.some(slot => slot.card));
+    private static calcWhichNumberGroupsOfTheSameNumberToShow(num: number, numberGroups: CardNumberGroup[], currentlyDraggedCard: RealCardData | null): CardNumberGroup[] {
+        const setsThatHaveACard = numberGroups.filter(slotSet => slotSet.slots.some(slot => slot.card));
 
-        if (card === null) {
-            return slotsThatHaveSomeCard;
+        if (!currentlyDraggedCard) {
+            return setsThatHaveACard;
         }
 
-        switch (card.type) {
-            case 'number': {
-                if (num !== card.numericValue) {
-                    return slotsThatHaveSomeCard;
-                }
-
-                return slotSets.slice(0, Math.min(slotsThatHaveSomeCard.length + 1, slotSets.length));
-            }
-            case 'joker': {
-                if (slotsThatHaveSomeCard.length === 0) {
-                    return [slotSets[0]];
-                }
-                return slotsThatHaveSomeCard;
-            }
+        // The dragged card is irrelevant for this number group
+        if (currentlyDraggedCard.type === 'number' && currentlyDraggedCard.numericValue !== num) {
+            return setsThatHaveACard;
         }
+
+        // In case the dragged card is a joker or a number of this number group,
+        // we show all number groups of this number + a new empty number group set if available
+        return numberGroups.slice(0, Math.min(setsThatHaveACard.length + 1, numberGroups.length));
     }
 
     static getOnlyBoardsRunsThatShouldBeVisible(runs: CardRun[], currentlyDraggedCard: RealCardData | null): CardRun[] {
@@ -64,25 +57,21 @@ class BoardManager {
         }).sort(compare.byField(run => run.id, compare.numbers()));
     }
 
-    private static calcWhichRunsOfTheSameColorToShow(runColor: NumberCardColor, runs: CardRun[], card: RealCardData | null): CardRun[] {
-        const slotsThatHaveSomeCard = runs.filter(slotSet => slotSet.slots.some(slot => slot.card));
+    private static calcWhichRunsOfTheSameColorToShow(runColor: NumberCardColor, runs: CardRun[], currentlyDraggedCard: RealCardData | null): CardRun[] {
+        const setsThatHaveACard = runs.filter(slotSet => slotSet.slots.some(slot => slot.card));
 
-        if (card === null) {
-            return slotsThatHaveSomeCard;
+        if (!currentlyDraggedCard) {
+            return setsThatHaveACard;
         }
-        
-        switch (card.type) {
-            case 'number': {
-                if (runColor !== card.color) {
-                    return slotsThatHaveSomeCard;
-                }
 
-                return runs.slice(0, Math.min(slotsThatHaveSomeCard.length + 1, runs.length));
-            }
-            case 'joker': {
-                return runs.slice(0, Math.min(slotsThatHaveSomeCard.length + 1, runs.length));
-            }
+        // The dragged card is irrelevant for this run because it is not of the same color
+        if (currentlyDraggedCard.type === 'number' && currentlyDraggedCard.color !== runColor) {
+            return setsThatHaveACard;
         }
+
+        // In case the dragged card is a joker or a number of this run,
+        // we show all runs of this color + a new empty run set if available
+        return runs.slice(0, Math.min(setsThatHaveACard.length + 1, runs.length));
     }
 
     get isBoardValid(): boolean {
