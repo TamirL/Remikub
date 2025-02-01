@@ -107,7 +107,7 @@ class BoardManager {
         }
 
         // if there is a set of cards that is under 3 cards, it means the run is invalid
-        return currentSetSize < 3;
+        return currentSetSize === 0 || currentSetSize >= 3;
     }
 }
 
