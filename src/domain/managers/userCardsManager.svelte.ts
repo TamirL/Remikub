@@ -1,5 +1,5 @@
 import { compare, type CompareFunction } from "../../utils/comparatorUtils";
-import type { CardType, RealCardData } from "../card";
+import { cardColorComparator, type CardType, type JokerCardColor, type NumberCardColor, type RealCardData } from "../card";
 
 class UserCardsManager {
     private _userCards: RealCardData[] = $state([]);
@@ -23,7 +23,7 @@ class UserCardsManager {
     orderByColor() {
         this._userCards = this._userCards.sort(
             compare.byField<RealCardData, CardType>(card => card.type, compare.unionType(['number', 'joker']))
-                .then(compare.byField<RealCardData, string>(card => card.color, compare.stringsCaseInsensitive()))
+                .then(compare.byField<RealCardData, NumberCardColor | JokerCardColor>(card => card.color, cardColorComparator))
                 .then(UserCardsManager.compareCardsByCardValue));
     }
 
@@ -31,7 +31,7 @@ class UserCardsManager {
         this._userCards = this._userCards.sort(
             compare.byField<RealCardData, CardType>(card => card.type, compare.unionType(['number', 'joker']))
                 .then(UserCardsManager.compareCardsByCardValue)
-                .then(compare.byField<RealCardData, string>(card => card.color, compare.stringsCaseInsensitive())));
+                .then(compare.byField<RealCardData, NumberCardColor | JokerCardColor>(card => card.color, cardColorComparator)));
     }
 
     private static compareCardsByCardValue(card1: RealCardData, card2: RealCardData): number {
