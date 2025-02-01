@@ -27,6 +27,11 @@ class Game {
             return;
         }
 
+        if (!canPutRealCardOnSlot(cardToMove, to.expectedCard)) {
+            console.error('Cannot put card on slot', to);
+            return;
+        }
+
         from.card = null;
         to.card = cardToMove;
     }
