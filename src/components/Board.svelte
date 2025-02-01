@@ -70,6 +70,7 @@
 	.board-number-groups {
 		display: flex;
 		flex-direction: column;
+		justify-content: center;
 		gap: 9px 14px;
 		flex-wrap: wrap;
 		flex: 1;
@@ -80,6 +81,7 @@
 	.board-runs {
 		display: flex;
 		flex-direction: column;
+		justify-content: center;
 		gap: 9px;
 	}
 
