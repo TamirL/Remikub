@@ -4,8 +4,8 @@
 	import Game from './Game.svelte';
 
 	setCardSizeContext({
-		width: '30px',
-		height: '40px'
+		width: '40px',
+		height: '60px'
 	});
 </script>
 
