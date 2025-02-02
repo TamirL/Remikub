@@ -2,8 +2,8 @@
 	import type { CardSlotData } from '../../domain/board';
 	import { canPutRealCardOnSlot, getCardDragDropContext } from '../../domain/card';
 	import { getGameContext } from '../../domain/game';
-	import Card from './Card.svelte';
-	import DragabbleCard from './DragabbleCard.svelte';
+	import Card from '$lib/Card.svelte';
+	import DragabbleCard from '$lib/DragabbleCard.svelte';
 
 	const { slot }: { slot: CardSlotData } = $props();
 	const dragDropContext = getCardDragDropContext();

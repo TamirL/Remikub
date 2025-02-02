@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getGameContext } from '../domain/game';
-	import Button from './Button.svelte';
+	import Button from '$lib/Button.svelte';
 
 	const gameContext = getGameContext();
 
