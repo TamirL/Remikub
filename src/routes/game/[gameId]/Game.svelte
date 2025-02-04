@@ -1,14 +1,14 @@
 <script lang="ts">
-	import { setCardDragDropContext } from '../domain/card';
-	import Board from '../components/Board.svelte';
-	import UserCards from '../components/UserCards.svelte';
-	import { createDeck } from '../domain/deck';
-	import GameManager from '../domain/managers/gameManager.svelte';
-	import { createEmptyBoard } from '../domain/board';
-	import DeckManager from '../domain/managers/deckManager.svelte';
-	import { setGameContext } from '../domain/game';
-	import UserCardsManager from '../domain/managers/userCardsManager.svelte';
-	import BoardManager from '../domain/managers/boardManager.svelte';
+	import { setCardDragDropContext } from '../../../domain/card';
+	import Board from '../../../components/Board.svelte';
+	import UserCards from '../../../components/UserCards.svelte';
+	import { createDeck } from '../../../domain/deck';
+	import GameManager from '../../../domain/managers/gameManager.svelte';
+	import { createEmptyBoard } from '../../../domain/board';
+	import DeckManager from '../../../domain/managers/deckManager.svelte';
+	import { setGameContext } from '../../../domain/game';
+	import UserCardsManager from '../../../domain/managers/userCardsManager.svelte';
+	import BoardManager from '../../../domain/managers/boardManager.svelte';
 	const dragDropContext = $state({ draggedCard: null, draggedFrom: null });
 	setCardDragDropContext(dragDropContext);
 

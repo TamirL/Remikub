@@ -1,6 +1,5 @@
 <script lang="ts">
-	import type { CardData } from '../../domain/card';
-	import { getCssCardColor, getCardSizeContext } from '../../domain/card';
+	import { getCardSizeContext, getCssCardColor, type CardData } from '../domain/card';
 
 	let { cardData }: { cardData: CardData } = $props();
 	let cardColor = getCssCardColor(cardData);
