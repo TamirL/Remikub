@@ -1,10 +1,7 @@
-import type { N } from "vitest/dist/chunks/environment.d8YfPkTm.js";
-import type { Board, CardRun, CardNumberGroup, CardSlotData, BoardWithVisibility, VisibilityOf } from "../board";
-import type { NumberCardColor, RealCardData, RealJokerCardData } from "../card";
-import type DeckManager from "./deckManager.svelte";
-import type UserCardsManager from "./userCardsManager.svelte";
-import { compare } from "../../utils/comparatorUtils";
-import { groupBy, groupByToMap } from "../../utils/arrayUtils";
+import { compare } from "$lib/utils/comparatorUtils";
+import { groupByToMap } from "$lib/utils/arrayUtils";
+import type { Board, CardNumberGroup, CardRun } from "$lib/domain/board";
+import type { NumberCardColor, RealCardData } from "$lib/domain/card";
 
 class BoardManager {
     private _board: Board = $state({ runs: [], numberGroups: [] });
@@ -90,7 +87,6 @@ class BoardManager {
     }
 
     static isRunValid(run: CardRun): boolean {
-        let index = 0;
         let currentSetSize = 0;
 
         for (let index = 0; index < run.slots.length; index++) {

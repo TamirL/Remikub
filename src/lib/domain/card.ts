@@ -1,6 +1,6 @@
 import { getContext, setContext } from "svelte";
 import type { CardSlotData } from "./board";
-import { compare, type Comparator } from "../utils/comparatorUtils";
+import { compare, type Comparator } from "$lib/utils/comparatorUtils";
 
 export type CardType = 'number' | 'joker';
 export type NumberCardColor = 'red' | 'blue' | 'yellow' | 'black';

@@ -1,4 +1,4 @@
-import { compare, type CompareFunction } from "../../utils/comparatorUtils";
+import { compare } from "$lib/utils/comparatorUtils";
 import { cardColorComparator, type CardType, type JokerCardColor, type NumberCardColor, type RealCardData } from "../card";
 
 class UserCardsManager {

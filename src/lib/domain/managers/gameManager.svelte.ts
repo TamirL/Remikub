@@ -1,4 +1,4 @@
-import type { Board, CardSlotData } from "../board";
+import type { CardSlotData } from "../board";
 import type BoardManager from "./boardManager.svelte";
 import { canPutRealCardOnSlot, type RealCardData } from "../card";
 import type DeckManager from "./deckManager.svelte";

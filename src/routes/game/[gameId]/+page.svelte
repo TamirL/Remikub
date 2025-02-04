@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { setCardSizeContext } from '../../../domain/card';
+	import { setCardSizeContext } from '$lib/domain/card';
 	import Game from './Game.svelte';
 
 	setCardSizeContext({

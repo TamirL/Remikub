@@ -1,5 +1,5 @@
-import { createIdGenerator } from "../utils/idGenerator";
-import type { CardData, RealCardData, RealJokerCardData, RealNumberCardData } from "./card";
+import { createIdGenerator } from "$lib/utils/idGenerator";
+import type { RealCardData, RealJokerCardData, RealNumberCardData } from "../../domain/card";
 
 const idGenerator = createIdGenerator();
 

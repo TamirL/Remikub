@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { CardSlotData } from '../domain/board';
-	import { canPutRealCardOnSlot, getCardDragDropContext, type RealCardData } from '../domain/card';
-	import { getGameContext } from '../domain/game';
-	import CardSlot from './card/CardSlot.svelte';
+	import type { CardSlotData } from '$lib/domain/board';
+	import { getCardDragDropContext } from '$lib/domain/card';
+	import { getGameContext } from '$lib/domain/game';
+	import CardSlot from './CardSlot.svelte';
 
 	const minimalVisibleBoard = $derived(
 		getGameContext().boardManager.getMinimalVisibleBoard(getCardDragDropContext().draggedCard)

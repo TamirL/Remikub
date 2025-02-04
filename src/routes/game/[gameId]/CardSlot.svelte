@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type { CardSlotData } from '../../domain/board';
-	import { canPutRealCardOnSlot, getCardDragDropContext } from '../../domain/card';
-	import { getGameContext } from '../../domain/game';
-	import Card from '$lib/Card.svelte';
-	import DragabbleCard from '$lib/DragabbleCard.svelte';
+	import Card from '$lib/components/Card.svelte';
+	import type { CardSlotData } from '$lib/domain/board';
+	import { canPutRealCardOnSlot, getCardDragDropContext } from '$lib/domain/card';
+	import { getGameContext } from '$lib/domain/game';
+	import DragabbleCard from '$lib/components/DragabbleCard.svelte';
 
 	const { slot }: { slot: CardSlotData } = $props();
 	const dragDropContext = getCardDragDropContext();

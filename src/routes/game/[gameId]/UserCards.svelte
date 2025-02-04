@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { RealCardData } from '../domain/card';
-	import DragabbleCard from '$lib/DragabbleCard.svelte';
+	import type { RealCardData } from '$lib/domain/card';
+	import DragabbleCard from '$lib/components/DragabbleCard.svelte';
 	import DrawCardButton from './DrawCardButton.svelte';
 	import OrderByColorButton from './OrderByColorButton.svelte';
 	import OrderByNumberButton from './OrderByNumberButton.svelte';

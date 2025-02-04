@@ -1,4 +1,3 @@
-import type { CardSlotData } from "../board";
 import type { RealCardData } from "../card";
 
 class DeckManager {
