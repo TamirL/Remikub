@@ -1,4 +1,4 @@
-import type { RealCardData } from "../card";
+import type { RealCardData } from "$lib/domain/card";
 
 class DeckManager {
     private _deck: RealCardData[] = $state([]);

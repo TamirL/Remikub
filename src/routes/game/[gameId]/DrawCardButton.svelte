@@ -9,4 +9,4 @@
 	}
 </script>
 
-<Button onclick={drawCard}>Draw Card - {gameContext.deckManager.deck.length}</Button>
+<Button onclick={drawCard}>Draw Card - {gameContext.gameManager.deckSize}</Button>

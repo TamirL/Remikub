@@ -5,7 +5,7 @@
 	const gameContext = getGameContext();
 
 	function orderByColor() {
-		gameContext.userCardsManager.orderByColor();
+		gameContext.gameManager.orderByColor();
 	}
 </script>
 

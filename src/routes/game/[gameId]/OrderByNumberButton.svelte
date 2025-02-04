@@ -5,7 +5,7 @@
 	const gameContext = getGameContext();
 
 	function orderByNumber() {
-		gameContext.userCardsManager.orderByValue();
+		gameContext.gameManager.orderByValue();
 	}
 </script>
 

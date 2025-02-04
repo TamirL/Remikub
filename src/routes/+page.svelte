@@ -8,7 +8,7 @@
 <div class="entry-page">
 	<form method="POST" action="?/create-game">
 		<label for="userName">User Name</label>
-		<input type="text" name="userName" />
+		<input type="text" name="userName" value={data.name} />
 		<div>
 			<Button type="submit">New Game</Button>
 

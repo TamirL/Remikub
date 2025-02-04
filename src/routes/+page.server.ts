@@ -1,6 +1,8 @@
 import { createOrUpdateUser, createUserUniqueId, getUser } from "$lib/server/storage/users";
 import { fail, redirect, type Actions, type RequestHandler } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
+import { createGame } from "$lib/server/domain/game";
+import { storeGame } from "$lib/server/storage/game";
 
 export const load: PageServerLoad = async ({ cookies }) => {
     const userId = cookies.get('userId');
@@ -29,8 +31,10 @@ export const actions: Actions = {
 
         const user = await createOrUpdateUser(cookies.get('userId') ?? null, userName);
 
+        const game = await createGame([user]);
+        await storeGame(game);
 
-        redirect(303, '/game/' + user.id);
+        redirect(303, '/game/' + game.id);
     },
     'join-game': async ({ request, cookies }) => {
         const formData = await request.formData();

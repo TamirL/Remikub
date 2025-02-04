@@ -1,12 +1,12 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import BoardManager from '../boardManager.svelte';
-import type { Board, CardRun, CardSlotData } from '../../board';
+import GameManager from '../gameManager.svelte';
+import type { Board, CardRun } from '../../board';
 
-describe('BoardManager.isRunValid', () => {
-    let boardManager: BoardManager;
+describe('GameManager.isRunValid', () => {
+    let gameManager: GameManager;
 
     beforeEach(() => {
-        boardManager = new BoardManager({ runs: [], numberGroups: [] });
+        gameManager = new GameManager({ board: { runs: [], numberGroups: [] }, id: '1', players: [], deckSize: 0, userCards: [] });
     });
 
     // Helper function to create a run with a pattern of filled/empty slots
@@ -23,22 +23,22 @@ describe('BoardManager.isRunValid', () => {
 
     it('should return true for an empty run', () => {
         const run = createTestRun([false, false, false]);
-        expect(BoardManager.isRunValid(run)).toBe(true);
+        expect(GameManager.isRunValid(run)).toBe(true);
     });
 
     it('should return true for a single set of 3 cards', () => {
         const run = createTestRun([true, true, true]);
-        expect(BoardManager.isRunValid(run)).toBe(true);
+        expect(GameManager.isRunValid(run)).toBe(true);
     });
 
     it('should return true for a single set of more than 3 cards', () => {
         const run = createTestRun([true, true, true, true, true]);
-        expect(BoardManager.isRunValid(run)).toBe(true);
+        expect(GameManager.isRunValid(run)).toBe(true);
     });
 
     it('should return false for a set of 2 cards', () => {
         const run = createTestRun([true, true]);
-        expect(BoardManager.isRunValid(run)).toBe(false);
+        expect(GameManager.isRunValid(run)).toBe(false);
     });
 
     it('should return true for multiple valid sets separated by gaps', () => {
@@ -46,7 +46,7 @@ describe('BoardManager.isRunValid', () => {
             true, true, true, false, false,
             true, true, true, true
         ]);
-        expect(BoardManager.isRunValid(run)).toBe(true);
+        expect(GameManager.isRunValid(run)).toBe(true);
     });
 
     it('should return false if there is an invalid set in the middle', () => {
@@ -55,7 +55,7 @@ describe('BoardManager.isRunValid', () => {
             true, true, // Invalid set of 2
             false, true, true, true
         ]);
-        expect(BoardManager.isRunValid(run)).toBe(false);
+        expect(GameManager.isRunValid(run)).toBe(false);
     });
 
     it('should return false if there is an invalid set at the end', () => {
@@ -63,16 +63,16 @@ describe('BoardManager.isRunValid', () => {
             true, true, true, false,
             true, true // Invalid set of 2 at the end
         ]);
-        expect(BoardManager.isRunValid(run)).toBe(false);
+        expect(GameManager.isRunValid(run)).toBe(false);
     });
 
     it('should return true for a run with trailing empty slots', () => {
         const run = createTestRun([true, true, true, false, false]);
-        expect(BoardManager.isRunValid(run)).toBe(true);
+        expect(GameManager.isRunValid(run)).toBe(true);
     });
 
     it('should return true for a run with leading empty slots', () => {
         const run = createTestRun([false, false, true, true, true]);
-        expect(BoardManager.isRunValid(run)).toBe(true);
+        expect(GameManager.isRunValid(run)).toBe(true);
     });
 }); 

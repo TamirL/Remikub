@@ -1,20 +1,50 @@
-import type { CardSlotData } from "../board";
-import type BoardManager from "./boardManager";
-import { canPutRealCardOnSlot, type RealCardData } from "../card";
-import type DeckManager from "./deckManager";
-import type UserCardsManager from "./userCardsManager";
+import type { Board, CardNumberGroup, CardRun, CardSlotData } from "$lib/domain/board";
+import { canPutRealCardOnSlot, type RealCardData } from "$lib/domain/card";
+import type { Game } from "$lib/server/domain/game";
 
-class Game {
-    private deckManager: DeckManager;
-    private userCardsManager: UserCardsManager;
-    private boardManager: BoardManager;
+class GameManager {
+    private _game: Game = $state({} as Game);
+    private _isBoardValid: boolean = $derived.by(() => this.calcIsBoardValid(this._game.board));
 
-    constructor(deckManager: DeckManager, boardManager: BoardManager, userCardsManager: UserCardsManager) {
-        this.deckManager = deckManager;
-        this.boardManager = boardManager;
-        this.userCardsManager = userCardsManager;
+    constructor(game: Game) {
+        this._game = game;
     }
 
+    // Deck Management
+    drawCard(userId: string): RealCardData {
+        const newCardFromDeck = this._game.deck.shift();
+        if (!newCardFromDeck) {
+            throw new Error('Deck is empty');
+        }
+        this.addCardToUserCards(userId, newCardFromDeck);
+        return newCardFromDeck;
+    }
+
+    // User Cards Management
+    private addCardToUserCards(userId: string, card: RealCardData): void {
+        // TODO: Add proper user management
+        const user = this._game.players.find(p => p.user.id === userId);
+
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        user.userCards.push(card);
+    }
+
+
+    removeCardFromUserCards(userId: string, card: RealCardData): void {
+        // TODO: Add proper user management
+        const user = this._game.players.find(p => p.user.id === userId);
+
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        user.userCards = user.userCards.filter(c => c.id !== card.id);
+    }
+
+    // Card Movement
     moveCardFromSlot(from: CardSlotData, to: CardSlotData): void {
         const cardToMove = from.card;
         if (!cardToMove) {
@@ -36,22 +66,49 @@ class Game {
         to.card = cardToMove;
     }
 
-    moveCardFromUserCards(card: RealCardData, to: CardSlotData): boolean {
+    moveCardFromUserCards(userId: string, card: RealCardData, to: CardSlotData): boolean {
         if (!canPutRealCardOnSlot(card, to.expectedCard)) {
             console.error('Cannot put card on slot', to);
             return false;
         }
 
-        this.userCardsManager.removeCard(card);
+        this.removeCardFromUserCards(userId, card);
         to.card = card;
         return true;
     }
 
-    drawCardFromDeck(): RealCardData {
-        const drawnCard = this.deckManager.drawCard();
-        this.userCardsManager.addCard(drawnCard);
-        return drawnCard;
+    // Board validation
+    get isBoardValid(): boolean {
+        return this._isBoardValid;
+    }
+
+    private calcIsBoardValid(board: Board): boolean {
+        return board.numberGroups.every(numberGroup => this.isNumberGroupValid(numberGroup)) &&
+            board.runs.every(run => this.isRunValid(run));
+    }
+
+    private isNumberGroupValid(numberGroup: CardNumberGroup): boolean {
+        const amountOfCardsInNumberGroup = numberGroup.slots.filter(slot => slot.card).length;
+        return amountOfCardsInNumberGroup === 0 || amountOfCardsInNumberGroup >= 3;
+    }
+
+    private isRunValid(run: CardRun): boolean {
+        let currentSetSize = 0;
+
+        for (const slot of run.slots) {
+            if (slot.card) {
+                currentSetSize++;
+            } else {
+                if (currentSetSize !== 0 && currentSetSize < 3) {
+                    return false;
+                }
+                currentSetSize = 0;
+            }
+        }
+
+        return currentSetSize === 0 || currentSetSize >= 3;
     }
 }
 
-export default Game;
+
+export default GameManager;

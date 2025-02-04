@@ -5,14 +5,15 @@
 	import CardSlot from './CardSlot.svelte';
 
 	const minimalVisibleBoard = $derived(
-		getGameContext().boardManager.getMinimalVisibleBoard(getCardDragDropContext().draggedCard)
+		getGameContext().gameManager.getMinimalVisibleBoard(getCardDragDropContext().draggedCard)
 	);
 
-	let boardManager = getGameContext().boardManager;
+	let gameManager = getGameContext().gameManager;
 
 	function onDragOver(event: DragEvent) {
 		event.preventDefault();
 	}
+
 
 	function onDrop(event: DragEvent) {
 		event.preventDefault();
@@ -20,7 +21,7 @@
 </script>
 
 <div
-	class={['board-main', boardManager.isBoardValid ? 'valid' : 'invalid']}
+	class={['board-main', gameManager.isBoardValid ? 'valid' : 'invalid']}
 	role="region"
 	ondragover={onDragOver}
 	ondrop={onDrop}
