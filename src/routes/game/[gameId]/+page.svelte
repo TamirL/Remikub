@@ -3,9 +3,10 @@
 	import type { GameFromPlayerPerspective } from '$lib/domain/game';
 	import Game from './Game.svelte';
 
+	const widthInPixels = 40;
 	setCardSizeContext({
-		width: '40px',
-		height: '60px'
+		width: `${widthInPixels}px`,
+		height: `${widthInPixels * 1.41}px`
 	});
 
 	const { data }: { data: GameFromPlayerPerspective } = $props();

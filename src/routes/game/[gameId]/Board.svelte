@@ -14,7 +14,6 @@
 		event.preventDefault();
 	}
 
-
 	function onDrop(event: DragEvent) {
 		event.preventDefault();
 	}
