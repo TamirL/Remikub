@@ -1,8 +1,8 @@
 import { groupByToMap } from "$lib/utils/arrayUtils";
 import { compare } from "$lib/utils/comparatorUtils";
 import type { Board, CardNumberGroup, CardRun, CardSlotData } from "../board";
-import { allCardsById, canPutRealCardOnSlot, type NumberCardColor, type RealCardData } from "../cards";
-import type { CardMoveAction, GameFromPlayerPerspective } from "../game";
+import { allCardsById, canPutRealCardOnSlot, cardColorComparator, type CardType, type JokerCardColor, type NumberCardColor, type RealCardData } from "../cards";
+import type { CardMoveAction } from "../gameActions";
 import type UpdateManager from "./updateManager.svelte";
 
 class GameManager {
@@ -26,7 +26,7 @@ class GameManager {
     }
 
     get userCards() {
-        return this._updateManager.gameData.userCards;
+        return this._updateManager.gameData.userCardsIds.map(cardId => allCardsById.get(cardId)).filter(card => !!card) as RealCardData[];
     }
 
     get deckSize() {
@@ -96,18 +96,20 @@ class GameManager {
         // TODO: Implement
     }
 
-    orderByColor() {
-        //     this._userCards = this._updateManager.gameData.userCards.sort(
-        //         compare.byField<RealCardData, CardType>(card => card.type, compare.unionType(['number', 'joker']))
-        //             .then(compare.byField<RealCardData, NumberCardColor | JokerCardColor>(card => card.color, cardColorComparator))
-        //             .then(UserCardsManager.compareCardsByCardValue));
+    getUserCardsIdsOrderdByColor() {
+        return this.userCards.toSorted(
+            compare.byField<RealCardData, CardType>(card => card.type, compare.unionType(['number', 'joker']))
+                .then(compare.byField<RealCardData, NumberCardColor | JokerCardColor>(card => card.color, cardColorComparator))
+                .then(GameManager.compareCardsByCardValue))
+            .map(card => card.id);
     }
 
-    orderByValue() {
-        //     this._userCards = this._userCards.sort(
-        //         compare.byField<RealCardData, CardType>(card => card.type, compare.unionType(['number', 'joker']))
-        //             .then(UserCardsManager.compareCardsByCardValue)
-        //             .then(compare.byField<RealCardData, NumberCardColor | JokerCardColor>(card => card.color, cardColorComparator)));
+    getUserCardsIdsOrderdByValue() {
+        return this.userCards.toSorted(
+            compare.byField<RealCardData, CardType>(card => card.type, compare.unionType(['number', 'joker']))
+                .then(GameManager.compareCardsByCardValue)
+                .then(compare.byField<RealCardData, NumberCardColor | JokerCardColor>(card => card.color, cardColorComparator)))
+            .map(card => card.id);
     }
 
     private static compareCardsByCardValue(card1: RealCardData, card2: RealCardData): number {

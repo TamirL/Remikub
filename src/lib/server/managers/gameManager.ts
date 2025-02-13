@@ -29,7 +29,7 @@ class GameManager {
             throw new Error('User not found');
         }
 
-        user.userCards.push(card);
+        user.userCardsIds.push(card.id);
     }
 
 
@@ -41,7 +41,7 @@ class GameManager {
             throw new Error('User not found');
         }
 
-        user.userCards = user.userCards.filter(c => c.id !== card.id);
+        user.userCardsIds = user.userCardsIds.filter(cardId => cardId !== card.id);
     }
 
     // // Card Movement

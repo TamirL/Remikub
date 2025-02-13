@@ -1,5 +1,5 @@
 import type { Board, CardSlotData } from "$lib/domain/board";
-import type { CardMoveAction } from "$lib/domain/game";
+import type { CardMoveAction } from "$lib/domain/gameActions";
 import type { Game, PlayerInGame } from "$lib/server/domain/game";
 import { getGame, storeGame } from "$lib/server/storage/game";
 import { type RequestHandler } from "@sveltejs/kit";

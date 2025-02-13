@@ -2,7 +2,6 @@ import { getContext, setContext } from "svelte";
 import GameManager from "./managers/gameManager.svelte";
 import type { User } from "./user";
 import type { Board } from "./board";
-import type { RealCardData } from "./cards";
 
 export type GameFromPlayerPerspective = {
     id: string;
@@ -10,7 +9,7 @@ export type GameFromPlayerPerspective = {
     currentTurnUserId: string;
     board: Board;
     deckSize: number;
-    userCards: RealCardData[];
+    userCardsIds: number[];
 }
 
 export type GameContext = {
@@ -35,7 +34,3 @@ export type CardSlotLocation = {
     slotId: number;
 }
 
-export type CardMoveAction = {
-    from: CardLocation;
-    to: CardSlotLocation;
-}

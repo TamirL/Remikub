@@ -15,19 +15,19 @@ export type Game = {
 
 export type PlayerInGame = {
     user: User;
-    userCards: RealCardData[];
+    userCardsIds: number[];
 }
 
 export function createGame(players: User[]): Game {
     const deck = createDeck();
-    const userCards = deck.splice(0, 14);
+    const userCardsIds = deck.splice(0, 14).map(c => c.id);
 
     return {
         id: crypto.randomUUID(),
         players: [
             {
                 user: players[0],
-                userCards: userCards
+                userCardsIds,
             }
             // TODO: Add support for multiple players
         ],
@@ -50,6 +50,6 @@ export function getGameFromUserPerspective(game: Game, userId: string): GameFrom
         currentTurnUserId: game.currentTurnPlayerId,
         board: game.board,
         deckSize: game.deck.length,
-        userCards: player.userCards
+        userCardsIds: player.userCardsIds
     };
 }
