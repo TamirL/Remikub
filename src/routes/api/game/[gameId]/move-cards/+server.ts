@@ -2,7 +2,7 @@ import type { Board, CardSlotData } from "$lib/domain/board";
 import type { CardMoveAction } from "$lib/domain/game";
 import type { Game, PlayerInGame } from "$lib/server/domain/game";
 import { getGame, storeGame } from "$lib/server/storage/game";
-import { fail, type RequestHandler } from "@sveltejs/kit";
+import { type RequestHandler } from "@sveltejs/kit";
 import { broadcastGameUpdate } from "../updates/updatePusher";
 
 export const POST: RequestHandler = async ({ request, params, cookies }) => {
@@ -40,7 +40,7 @@ export const POST: RequestHandler = async ({ request, params, cookies }) => {
     }, game);
 
     storeGame(updatedGame);
-    broadcastGameUpdate(updatedGame);
+    broadcastGameUpdate('player-move', updatedGame);
 
     return new Response();
 };

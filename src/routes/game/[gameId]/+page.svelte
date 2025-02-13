@@ -5,6 +5,7 @@
 	import UpdateManager from '$lib/domain/managers/updateManager.svelte';
 	import Game from './Game.svelte';
 	import { browser } from '$app/environment';
+	import { source, type Source } from 'sveltekit-sse';
 
 	const widthInPixels = 40;
 	setCardSizeContext({
@@ -14,26 +15,10 @@
 
 	const { data }: { data: GameFromPlayerPerspective } = $props();
 
-	let updatesEventSource: EventSource | null = null;
+	let updatesEventSource: Source | null = null;
 
 	if (browser) {
-		// updatesEventSource = new EventSource(`/api/game/${data.id}/updates`);
-		setTimeout(async () => {
-			const response = await fetch(`/api/game/${data.id}/updates`);
-
-			if (response.body === null) {
-				console.error('No body');
-				return;
-			}
-
-			const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
-			while (true) {
-				console.log('reading');
-				const { value, done } = await reader.read();
-				console.log('resp', done, value);
-				if (done) break;
-			}
-		});
+		updatesEventSource = source(`/api/game/${data.id}/updates`);
 	}
 
 	const gameManager = $state(new GameManager(new UpdateManager(data, updatesEventSource)));

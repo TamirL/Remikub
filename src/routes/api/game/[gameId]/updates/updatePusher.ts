@@ -1,6 +1,7 @@
+import type { GameUpdate } from "$lib/domain/updates";
 import { getGameFromUserPerspective, type Game } from "$lib/server/domain/game";
 
-type EventWriter = (event: string) => void;
+type EventWriter = (event: GameUpdate) => void;
 
 const gameIdToUserEventController: Map<string, Map<string, EventWriter>> = new Map();
 
@@ -20,14 +21,15 @@ export function subscribeUserToGameUpdates(gameId: string, userId: string, userE
     }
 }
 
-let id = 0;
-const event = 'message';
-
-export function broadcastGameUpdate(game: Game) {
+export function broadcastGameUpdate(updateType: GameUpdate['type'], game: Game) {
     const eventControllersByUserId = gameIdToUserEventController.get(game.id);
 
     eventControllersByUserId?.entries().forEach(([userId, eventSender]) => {
-        const data = JSON.stringify(getGameFromUserPerspective(game, userId));
-        eventSender(data);
+        const gameUpdate: GameUpdate = {
+            type: updateType,
+            updatedGameData: getGameFromUserPerspective(game, userId)
+        };
+
+        eventSender(gameUpdate);
     })
 }

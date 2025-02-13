@@ -1,9 +1,10 @@
 import { error, type RequestHandler } from "@sveltejs/kit";
 import { subscribeUserToGameUpdates } from "./updatePusher";
+import { produce } from "sveltekit-sse";
 
 let id = 0;
 
-export const GET: RequestHandler = ({ request, params, cookies }) => {
+export const POST: RequestHandler = ({ request, params, cookies }) => {
     const gameId = params['gameId'];
 
     if (!gameId) {
@@ -16,29 +17,17 @@ export const GET: RequestHandler = ({ request, params, cookies }) => {
         throw error(401, 'Unauthorized');
     }
 
+    return produce(async function start({ emit }) {
+        const removeSubscription = subscribeUserToGameUpdates(gameId, userId, (data) => {
+            const { error } = emit('message', JSON.stringify(data));
+            if (error) {
+                console.error('updates error', error);
+            }
+        });
 
-    const stream = new ReadableStream<string>({
-        start(controller) {
-            const removeSubscription = subscribeUserToGameUpdates(gameId, userId, (data) => {
-                let msg = `id: ${++id}\n`;
-                msg += 'data: ' + data.trim().replace(/\n+/gm, '\ndata: ') + '\n\n';
-                controller.enqueue(msg);
-            });
-            // When client disconnects, remove the writer from the channel
-            request.signal.addEventListener('abort', () => {
-                removeSubscription();
-                controller.close();
-            });
-        },
-    });
-
-    return new Response(stream, {
-        headers: {
-            'Content-Type': 'text/event-stream',
-            'Cache-Control': 'no-cache',
-            Connection: 'keep-alive',
-            'X-Accel-Buffering': 'no'
-        }
-    });
-
+        return () => {
+            console.log('closing connection');
+            removeSubscription();
+        };
+    })
 } 

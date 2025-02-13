@@ -1,32 +1,30 @@
 import type { GameFromPlayerPerspective } from "../game";
 import type { GameUpdate } from "../updates";
+import { source, type Source } from 'sveltekit-sse'
+
 
 export default class UpdateManager {
     private _gameData: GameFromPlayerPerspective = $state({} as GameFromPlayerPerspective);
 
-    private _updateEventSource: EventSource | null;
-
-    constructor(initialGameData: GameFromPlayerPerspective, updateEventSource: EventSource | null) {
+    constructor(initialGameData: GameFromPlayerPerspective, updateEventSource: Source | null) {
         this._gameData = initialGameData;
-        this._updateEventSource = updateEventSource;
+        console.log('UpdateManager.constructor');
 
-        if (this._updateEventSource) {
-            this._updateEventSource.onmessage = this.onMessage.bind(this);
-            this._updateEventSource.onerror = (ev) => {
-                console.error('UpdateManager.onMessage', ev);
-            };
-            this._updateEventSource.onopen = (ev) => {
-                console.log('UpdateManager.onOpen', ev);
-            };
-        }
+        updateEventSource?.select('message').subscribe((data) => {
+            console.log('UpdateManager.onMessage', { data });
+
+            if (!data) {
+                console.log('No data in message');
+                return;
+            }
+
+            const gameUpdate: GameUpdate = JSON.parse(data);
+            return this._gameData = gameUpdate.updatedGameData;
+        });
+
     }
 
     public get gameData(): GameFromPlayerPerspective {
         return this._gameData;
-    }
-
-    onMessage = (ev: MessageEvent<GameUpdate>) => {
-        console.log('UpdateManager.onMessage', ev.data);
-        this._gameData = ev.data.updatedGameData;
     }
 }
