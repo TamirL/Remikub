@@ -1,8 +1,10 @@
 import type { GameFromPlayerPerspective } from '$lib/domain/game';
+import { getGameFromUserPerspective } from '$lib/server/domain/game';
 import { getGame } from '$lib/server/storage/game';
 import { error } from '@sveltejs/kit';
+import type { PageServerLoad } from './$types';
 
-export const load = async ({ params, cookies }): Promise<GameFromPlayerPerspective> => {
+export const load: PageServerLoad = async ({ params, cookies }): Promise<GameFromPlayerPerspective> => {
     const userId = cookies.get('userId');
 
     if (!userId) {
@@ -10,9 +12,12 @@ export const load = async ({ params, cookies }): Promise<GameFromPlayerPerspecti
     }
 
     const gameId = params.gameId;
-    const game = await getGame(gameId);
 
-    console.log('game', !!game, gameId, userId);
+    if (typeof gameId !== 'string' && !gameId) {
+        throw error(400, 'Bad request');
+    }
+
+    const game = await getGame(gameId);
 
     if (!game) {
         throw error(404, 'Game not found');
@@ -24,13 +29,7 @@ export const load = async ({ params, cookies }): Promise<GameFromPlayerPerspecti
         throw error(403, 'Forbidden');
     }
 
-    return {
-        id: game.id,
-        players: game.players.map(p => p.user),
-        board: game.board,
-        deckSize: game.deck.length,
-        userCards: player.userCards
-    };
+    return getGameFromUserPerspective(game, userId);
 }
 
 

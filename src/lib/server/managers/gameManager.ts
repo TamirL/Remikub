@@ -1,5 +1,5 @@
 import type { Board, CardNumberGroup, CardRun, CardSlotData } from "$lib/domain/board";
-import { canPutRealCardOnSlot, type RealCardData } from "$lib/domain/card";
+import { canPutRealCardOnSlot, type RealCardData } from "$lib/domain/cards";
 import type { Game } from "$lib/server/domain/game";
 
 class GameManager {
@@ -44,38 +44,38 @@ class GameManager {
         user.userCards = user.userCards.filter(c => c.id !== card.id);
     }
 
-    // Card Movement
-    moveCardFromSlot(from: CardSlotData, to: CardSlotData): void {
-        const cardToMove = from.card;
-        if (!cardToMove) {
-            console.error('No card to move from slot', from);
-            return;
-        }
+    // // Card Movement
+    // moveCardFromSlot(from: CardSlotData, to: CardSlotData): void {
+    //     const cardToMove = from.card;
+    //     if (!cardToMove) {
+    //         console.error('No card to move from slot', from);
+    //         return;
+    //     }
 
-        if (to.card) {
-            console.error('Slot already has a card', to);
-            return;
-        }
+    //     if (to.card) {
+    //         console.error('Slot already has a card', to);
+    //         return;
+    //     }
 
-        if (!canPutRealCardOnSlot(cardToMove, to.expectedCard)) {
-            console.error('Cannot put card on slot', to);
-            return;
-        }
+    //     if (!canPutRealCardOnSlot(cardToMove, to.expectedCard)) {
+    //         console.error('Cannot put card on slot', to);
+    //         return;
+    //     }
 
-        from.card = null;
-        to.card = cardToMove;
-    }
+    //     from.card = null;
+    //     to.card = cardToMove;
+    // }
 
-    moveCardFromUserCards(userId: string, card: RealCardData, to: CardSlotData): boolean {
-        if (!canPutRealCardOnSlot(card, to.expectedCard)) {
-            console.error('Cannot put card on slot', to);
-            return false;
-        }
+    // moveCardFromUserCards(userId: string, card: RealCardData, to: CardSlotData): boolean {
+    //     if (!canPutRealCardOnSlot(card, to.expectedCard)) {
+    //         console.error('Cannot put card on slot', to);
+    //         return false;
+    //     }
 
-        this.removeCardFromUserCards(userId, card);
-        to.card = card;
-        return true;
-    }
+    //     this.removeCardFromUserCards(userId, card);
+    //     to.card = card;
+    //     return true;
+    // }
 
     // Board validation
     get isBoardValid(): boolean {
@@ -88,7 +88,7 @@ class GameManager {
     }
 
     private isNumberGroupValid(numberGroup: CardNumberGroup): boolean {
-        const amountOfCardsInNumberGroup = numberGroup.slots.filter(slot => slot.card).length;
+        const amountOfCardsInNumberGroup = numberGroup.slots.filter(slot => slot.cardId).length;
         return amountOfCardsInNumberGroup === 0 || amountOfCardsInNumberGroup >= 3;
     }
 
@@ -96,7 +96,7 @@ class GameManager {
         let currentSetSize = 0;
 
         for (const slot of run.slots) {
-            if (slot.card) {
+            if (slot.cardId) {
                 currentSetSize++;
             } else {
                 if (currentSetSize !== 0 && currentSetSize < 3) {

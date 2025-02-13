@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { CardSlotData } from '$lib/domain/board';
-	import { getCardDragDropContext, type RealCardData } from '$lib/domain/card';
+	import { getCardDragDropContext, type RealCardData } from '$lib/domain/cards';
 	import Card from './Card.svelte';
 
 	let { cardData, draggedFrom }: { cardData: RealCardData; draggedFrom: CardSlotData | null } =

@@ -1,4 +1,4 @@
-import type { RealCardData } from "$lib/domain/card";
+import type { RealCardData } from "$lib/domain/cards";
 
 class UserCardsManager {
     private _userCards: RealCardData[] = [];

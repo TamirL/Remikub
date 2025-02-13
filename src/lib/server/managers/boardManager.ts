@@ -1,7 +1,7 @@
 import { compare } from "$lib/utils/comparatorUtils";
 import { groupByToMap } from "$lib/utils/arrayUtils";
 import type { Board, CardNumberGroup, CardRun } from "$lib/domain/board";
-import type { NumberCardColor, RealCardData } from "$lib/domain/card";
+import type { NumberCardColor, RealCardData } from "$lib/domain/cards";
 
 class BoardManager {
     private _board: Board = $state({ runs: [], numberGroups: [] });

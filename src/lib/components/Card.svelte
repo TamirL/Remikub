@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getCardSizeContext, getCssCardColor, type CardData } from '$lib/domain/card';
+	import { getCardSizeContext, getCssCardColor, type CardData } from '$lib/domain/cards';
 	import cardTileImage from '$lib/assets/card-tile.webp';
 	import jokerCardRedImage from '$lib/assets/joker-red.webp';
 	import jokerCardBlackImage from '$lib/assets/joker-black.webp';

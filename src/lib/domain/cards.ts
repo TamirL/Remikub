@@ -1,6 +1,7 @@
 import { getContext, setContext } from "svelte";
 import type { CardSlotData } from "./board";
 import { compare, type Comparator } from "$lib/utils/comparatorUtils";
+import { createIdGenerator } from "$lib/utils/idGenerator";
 
 export type CardType = 'number' | 'joker';
 export type NumberCardColor = 'red' | 'blue' | 'yellow' | 'black';
@@ -121,3 +122,31 @@ export function isCardsEqual(card1: CardData | null, card2: CardData | null) {
             return card1.color === card2.color;
     }
 }
+
+const idGenerator = createIdGenerator();
+
+const allNumberCards: RealNumberCardData[] = [
+    // First number group
+    ...[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].flatMap((numericValue): RealNumberCardData[] => [
+        { type: 'number', id: idGenerator(), numericValue, color: 'yellow' },
+        { type: 'number', id: idGenerator(), numericValue, color: 'yellow' },
+        { type: 'number', id: idGenerator(), numericValue, color: 'blue' },
+        { type: 'number', id: idGenerator(), numericValue, color: 'blue' },
+        { type: 'number', id: idGenerator(), numericValue, color: 'red' },
+        { type: 'number', id: idGenerator(), numericValue, color: 'red' },
+        { type: 'number', id: idGenerator(), numericValue, color: 'black' },
+        { type: 'number', id: idGenerator(), numericValue, color: 'black' },
+    ]),
+];
+
+const allJokerCards: RealJokerCardData[] = [
+    { type: 'joker', id: idGenerator(), color: 'red' },
+    { type: 'joker', id: idGenerator(), color: 'black' }
+];
+
+export const allCards: RealCardData[] = [
+    ...allNumberCards,
+    ...allJokerCards
+];
+
+export const allCardsById = new Map(allCards.map(card => [card.id, card]));

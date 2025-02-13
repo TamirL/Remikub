@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Card from '$lib/components/Card.svelte';
 	import type { CardSlotData } from '$lib/domain/board';
-	import { canPutRealCardOnSlot, getCardDragDropContext } from '$lib/domain/card';
+	import { allCardsById, canPutRealCardOnSlot, getCardDragDropContext } from '$lib/domain/cards';
 	import { getGameContext } from '$lib/domain/game';
 	import DragabbleCard from '$lib/components/DragabbleCard.svelte';
 
@@ -12,7 +12,8 @@
 	let isCardOverThisSlot = $state(false);
 
 	const amIAvailableForDraggedCard = $derived(
-		!slot.card || (!!dragDropContext.draggedCard && slot.card.id === dragDropContext.draggedCard.id)
+		!slot.cardId ||
+			(!!dragDropContext.draggedCard && slot.cardId === dragDropContext.draggedCard.id)
 	);
 	const isMatchingCardDragged = $derived(
 		!!dragDropContext.draggedCard &&
@@ -62,8 +63,8 @@
 	}}
 >
 	<div class={dragDropContext.draggedCard ? 'is-any-card-dragged' : ''}>
-		{#if slot.card}
-			<DragabbleCard cardData={slot.card} draggedFrom={slot} />
+		{#if slot.cardId && allCardsById.has(slot.cardId)}
+			<DragabbleCard cardData={allCardsById.get(slot.cardId)!} draggedFrom={slot} />
 		{:else}
 			<div style:opacity={0.2}>
 				<Card cardData={slot.expectedCard} />

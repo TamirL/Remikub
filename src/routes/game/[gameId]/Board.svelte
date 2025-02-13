@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { CardSlotData } from '$lib/domain/board';
-	import { getCardDragDropContext } from '$lib/domain/card';
+	import { getCardDragDropContext } from '$lib/domain/cards';
 	import { getGameContext } from '$lib/domain/game';
 	import CardSlot from './CardSlot.svelte';
 

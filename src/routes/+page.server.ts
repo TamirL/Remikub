@@ -1,5 +1,5 @@
 import { createOrUpdateUser, createUserUniqueId, getUser } from "$lib/server/storage/users";
-import { fail, redirect, type Actions, type RequestHandler } from "@sveltejs/kit";
+import { fail, redirect, type Actions } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 import { createGame } from "$lib/server/domain/game";
 import { storeGame } from "$lib/server/storage/game";

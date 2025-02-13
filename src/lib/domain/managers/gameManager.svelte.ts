@@ -1,46 +1,53 @@
 import { groupByToMap } from "$lib/utils/arrayUtils";
 import { compare } from "$lib/utils/comparatorUtils";
 import type { Board, CardNumberGroup, CardRun, CardSlotData } from "../board";
-import { canPutRealCardOnSlot, type NumberCardColor, type RealCardData } from "../card";
-import type { GameFromPlayerPerspective } from "../game";
+import { allCardsById, canPutRealCardOnSlot, type NumberCardColor, type RealCardData } from "../cards";
+import type { CardMoveAction, GameFromPlayerPerspective } from "../game";
+import type UpdateManager from "./updateManager.svelte";
 
 class GameManager {
-    private _gameData: GameFromPlayerPerspective = $state({} as GameFromPlayerPerspective);
-    private _isBoardValid: boolean = $derived.by(() => !!this._gameData.board && GameManager.calcIsBoardValid(this._gameData.board));
+    private _updateManager: UpdateManager;
+    private _isBoardValid: boolean = $derived.by(() => !!this._updateManager.gameData.board && GameManager.calcIsBoardValid(this._updateManager.gameData.board));
 
-    constructor(gameData: GameFromPlayerPerspective) {
-        this._gameData = gameData;
+    constructor(updateManager: UpdateManager) {
+        this._updateManager = updateManager;
     }
 
     get gameId(): string {
-        return this._gameData.id;
+        return this._updateManager.gameData.id;
     }
 
     get players() {
-        return this._gameData.players;
+        return this._updateManager.gameData.players;
     }
 
     get board() {
-        return this._gameData.board;
+        return this._updateManager.gameData.board;
     }
 
     get userCards() {
-        return this._gameData.userCards;
+        return this._updateManager.gameData.userCards;
     }
 
     get deckSize() {
-        return this._gameData.deckSize;
+        return this._updateManager.gameData.deckSize;
     }
 
     moveCardFromSlot(from: CardSlotData, to: CardSlotData): void {
-        const cardToMove = from.card;
+
+        if (!from.cardId) {
+            console.error('No card to move from slot', from);
+            return;
+        }
+
+        const cardToMove = allCardsById.get(from.cardId);
 
         if (!cardToMove) {
             console.error('No card to move from slot', from);
             return;
         }
 
-        if (to.card) {
+        if (to.cardId) {
             console.error('Slot already has a card', to);
             return;
         }
@@ -50,26 +57,38 @@ class GameManager {
             return;
         }
 
-        from.card = null;
-        to.card = cardToMove;
+        const moveActions: CardMoveAction[] = [{
+            from: { location: 'board', cardId: from.cardId },
+            to: { location: 'board', slotId: to.id }
+        }];
 
-        // TODO: implement
+        fetch(`/api/game/${this.gameId}/move-cards`, {
+            method: 'POST',
+            body: JSON.stringify(moveActions)
+        });
     }
 
-    moveCardFromUserCards(card: RealCardData, to: CardSlotData): boolean {
+    async moveCardFromUserCards(card: RealCardData, to: CardSlotData): Promise<boolean> {
         if (!canPutRealCardOnSlot(card, to.expectedCard)) {
             console.error('Cannot put card on slot', to);
             return false;
         }
 
-        this._gameData.userCards = this._gameData.userCards.filter(c => c.id !== card.id);
-        to.card = card;
+        const moveActions: CardMoveAction[] = [{
+            from: { location: 'user', cardId: card.id },
+            to: { location: 'board', slotId: to.id }
+        }];
+
+        await fetch(`/api/game/${this.gameId}/move-cards`, {
+            method: 'POST',
+            body: JSON.stringify(moveActions)
+        });
+
         return true;
-        // TODO: implement
     }
 
     drawCardFromDeck() {
-        if (this._gameData.deckSize <= 0) {
+        if (this._updateManager.gameData.deckSize <= 0) {
             console.error('Deck is empty');
             throw new Error('Deck is empty');
         }
@@ -78,7 +97,7 @@ class GameManager {
     }
 
     orderByColor() {
-        //     this._userCards = this._gameData.userCards.sort(
+        //     this._userCards = this._updateManager.gameData.userCards.sort(
         //         compare.byField<RealCardData, CardType>(card => card.type, compare.unionType(['number', 'joker']))
         //             .then(compare.byField<RealCardData, NumberCardColor | JokerCardColor>(card => card.color, cardColorComparator))
         //             .then(UserCardsManager.compareCardsByCardValue));
@@ -113,8 +132,8 @@ class GameManager {
 
     getMinimalVisibleBoard(currentlyDraggedCard: RealCardData | null): Board {
         return {
-            numberGroups: GameManager.getOnlyBoardsNumberThatShouldBeVisible(this._gameData.board.numberGroups, currentlyDraggedCard),
-            runs: GameManager.getOnlyBoardsRunsThatShouldBeVisible(this._gameData.board.runs, currentlyDraggedCard)
+            numberGroups: GameManager.getOnlyBoardsNumberThatShouldBeVisible(this._updateManager.gameData.board.numberGroups, currentlyDraggedCard),
+            runs: GameManager.getOnlyBoardsRunsThatShouldBeVisible(this._updateManager.gameData.board.runs, currentlyDraggedCard)
         };
 
     }
@@ -127,7 +146,7 @@ class GameManager {
     }
 
     private static calcWhichNumberGroupsOfTheSameNumberToShow(num: number, numberGroups: CardNumberGroup[], currentlyDraggedCard: RealCardData | null): CardNumberGroup[] {
-        const setsThatHaveACard = numberGroups.filter(slotSet => slotSet.slots.some(slot => slot.card));
+        const setsThatHaveACard = numberGroups.filter(slotSet => slotSet.slots.some(slot => slot.cardId));
 
         if (!currentlyDraggedCard) {
             return setsThatHaveACard;
@@ -152,7 +171,7 @@ class GameManager {
     }
 
     private static calcWhichRunsOfTheSameColorToShow(runColor: NumberCardColor, runs: CardRun[], currentlyDraggedCard: RealCardData | null): CardRun[] {
-        const setsThatHaveACard = runs.filter(slotSet => slotSet.slots.some(slot => slot.card));
+        const setsThatHaveACard = runs.filter(slotSet => slotSet.slots.some(slot => slot.cardId));
 
         if (!currentlyDraggedCard) {
             return setsThatHaveACard;
@@ -179,7 +198,7 @@ class GameManager {
     }
 
     private static isNumberGroupValid(numberGroup: CardNumberGroup): boolean {
-        const amountOfCardsInNumberGroup = numberGroup.slots.filter(slot => slot.card).length;
+        const amountOfCardsInNumberGroup = numberGroup.slots.filter(slot => slot.cardId).length;
         // should be empty or have atleast 3 cards  
         return amountOfCardsInNumberGroup === 0 || amountOfCardsInNumberGroup >= 3;
     }
@@ -189,7 +208,7 @@ class GameManager {
 
         for (let index = 0; index < run.slots.length; index++) {
             const slot = run.slots[index];
-            if (slot.card) {
+            if (slot.cardId) {
                 currentSetSize++;
             } else {
                 if (currentSetSize !== 0 && currentSetSize < 3) {

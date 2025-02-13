@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { RealCardData } from '$lib/domain/card';
+	import type { RealCardData } from '$lib/domain/cards';
 	import DragabbleCard from '$lib/components/DragabbleCard.svelte';
 	import DrawCardButton from './DrawCardButton.svelte';
 	import OrderByColorButton from './OrderByColorButton.svelte';
