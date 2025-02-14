@@ -2,7 +2,7 @@ import type { Game, PlayerInGame } from "$lib/server/domain/game";
 import { getGame, storeGame } from "$lib/server/storage/game";
 import { isSetsEqual } from "$lib/utils/setUtils";
 import type { RequestHandler } from "@sveltejs/kit";
-import { broadcastGameUpdate } from "../updates/updatePusher";
+import { broadcastGameUpdate } from "../updates/gameUpdatePusher";
 import type { ReorderUserCardsAction } from "$lib/domain/gameActions";
 
 export const POST: RequestHandler = async ({ request, params, cookies }) => {
@@ -25,7 +25,7 @@ export const POST: RequestHandler = async ({ request, params, cookies }) => {
     }
 
     const thisPlayer = game.players.find(p => {
-        return p.user.id === userId;
+        return p.userId === userId;
     });
 
     if (!isSetsEqual(new Set(thisPlayer?.userCardsIds), new Set(thisPlayer?.userCardsIds))) {
@@ -44,6 +44,8 @@ export const POST: RequestHandler = async ({ request, params, cookies }) => {
 function performUserCardsReorder(game: Game, userId: string, newCardIdsOrder: number[]): Game {
     return ({
         id: game.id,
+        hasStarted: game.hasStarted,
+        initiatingPlayerId: game.initiatingPlayerId,
         currentTurnPlayerId: game.currentTurnPlayerId,
         deck: game.deck,
         players: reorderUserCards(game.players, userId, newCardIdsOrder),
@@ -53,12 +55,12 @@ function performUserCardsReorder(game: Game, userId: string, newCardIdsOrder: nu
 
 function reorderUserCards(players: PlayerInGame[], userId: string, newCardIdsOrder: number[]): PlayerInGame[] {
     return players.map(player => {
-        if (player.user.id !== userId) {
+        if (player.userId !== userId) {
             return player;
         }
 
         return {
-            user: player.user,
+            userId: player.userId,
             userCardsIds: newCardIdsOrder,
         };
     });

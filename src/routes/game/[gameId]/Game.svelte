@@ -2,9 +2,7 @@
 	import { setCardDragDropContext } from '$lib/domain/cards';
 	import Board from './Board.svelte';
 	import UserCards from './UserCards.svelte';
-	import { getGameContext, setGameContext } from '$lib/domain/game';
-	import type { GameFromPlayerPerspective } from '$lib/domain/game';
-	import GameManager from '$lib/domain/managers/gameManager.svelte';
+	import { getGameContext } from '$lib/domain/game';
 
 	const dragDropContext = $state({ draggedCard: null, draggedFrom: null });
 	setCardDragDropContext(dragDropContext);

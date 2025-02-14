@@ -1,5 +1,5 @@
 import { error, type RequestHandler } from "@sveltejs/kit";
-import { subscribeUserToGameUpdates } from "./gameUpdatePusher";
+import { subscribeUserToGameLobbyUpdates } from "./lobbyUpdatePusher";
 import { produce } from "sveltekit-sse";
 
 let id = 0;
@@ -18,7 +18,7 @@ export const POST: RequestHandler = ({ request, params, cookies }) => {
     }
 
     return produce(async function start({ emit }) {
-        const removeSubscription = subscribeUserToGameUpdates(gameId, userId, (data) => {
+        const removeSubscription = subscribeUserToGameLobbyUpdates(gameId, userId, (data) => {
             const { error } = emit('message', JSON.stringify(data));
             if (error) {
                 console.error('updates error', error);

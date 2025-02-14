@@ -1,8 +1,15 @@
 
-import type { GameFromPlayerPerspective } from "./game"
+import type { GameFromPlayerPerspective, GameLobbyFromUserPerspective } from "./game"
 
 
-export type GameUpdate = {
+export type GameUpdate<TData> = {
+    data: TData,
+}
+
+export type InProgressGameUpdate = GameUpdate<GameFromPlayerPerspective> & {
     type: 'player-move' | 'user-cards-reorder',
-    updatedGameData: GameFromPlayerPerspective,
+}
+
+export type GameLobbyUpdate = GameUpdate<GameLobbyFromUserPerspective> & {
+    type: 'player-joined' | 'game-started',
 }

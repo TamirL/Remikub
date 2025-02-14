@@ -16,7 +16,7 @@
 			<br />
 			<label for="gameId">Existing Game Id</label>
 			<input type="number" name="gameId" />
-			<Button formaction="?/join-game">Join Game</Button>
+			<Button formaction="?/join-lobby">Join Game</Button>
 		</div>
 	</form>
 </div>

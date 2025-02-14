@@ -1,7 +1,7 @@
-import type { GameUpdate } from "$lib/domain/updates";
+import type { GameUpdate, InProgressGameUpdate } from "$lib/domain/updates";
 import { getGameFromUserPerspective, type Game } from "$lib/server/domain/game";
 
-type EventWriter = (event: GameUpdate) => void;
+type EventWriter = (event: InProgressGameUpdate) => void;
 
 const gameIdToUserEventController: Map<string, Map<string, EventWriter>> = new Map();
 
@@ -21,13 +21,13 @@ export function subscribeUserToGameUpdates(gameId: string, userId: string, userE
     }
 }
 
-export function broadcastGameUpdate(updateType: GameUpdate['type'], game: Game) {
+export function broadcastGameUpdate(updateType: InProgressGameUpdate['type'], game: Game) {
     const eventControllersByUserId = gameIdToUserEventController.get(game.id);
 
-    eventControllersByUserId?.entries().forEach(([userId, eventSender]) => {
-        const gameUpdate: GameUpdate = {
+    eventControllersByUserId?.entries().forEach(async ([userId, eventSender]) => {
+        const gameUpdate: InProgressGameUpdate = {
             type: updateType,
-            updatedGameData: getGameFromUserPerspective(game, userId)
+            data: await getGameFromUserPerspective(game, userId)
         };
 
         eventSender(gameUpdate);

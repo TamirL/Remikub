@@ -3,7 +3,7 @@ import type { CardMoveAction } from "$lib/domain/gameActions";
 import type { Game, PlayerInGame } from "$lib/server/domain/game";
 import { getGame, storeGame } from "$lib/server/storage/game";
 import { type RequestHandler } from "@sveltejs/kit";
-import { broadcastGameUpdate } from "../updates/updatePusher";
+import { broadcastGameUpdate } from "../updates/gameUpdatePusher";
 
 export const POST: RequestHandler = async ({ request, params, cookies }) => {
     const userId = cookies.get('userId');
@@ -26,7 +26,7 @@ export const POST: RequestHandler = async ({ request, params, cookies }) => {
 
 
     const user = game?.players.find(p => {
-        return p.user.id === userId;
+        return p.userId === userId;
     });
 
     if (!user) {
@@ -48,6 +48,8 @@ export const POST: RequestHandler = async ({ request, params, cookies }) => {
 function performMove(game: Game, userId: string, cardMoveAction: CardMoveAction): Game {
     return ({
         id: game.id,
+        hasStarted: game.hasStarted,
+        initiatingPlayerId: game.initiatingPlayerId,
         currentTurnPlayerId: game.currentTurnPlayerId,
         deck: game.deck,
         players: performMoveOnPlayersCards(userId, game.players, cardMoveAction),
@@ -56,14 +58,25 @@ function performMove(game: Game, userId: string, cardMoveAction: CardMoveAction)
 }
 
 function performMoveOnPlayersCards(currentTurnPlayerId: string, players: PlayerInGame[], moveAction: CardMoveAction): PlayerInGame[] {
-    return players.map(player => {
-        if (player.user.id !== currentTurnPlayerId) {
+    return players.map((player): PlayerInGame => {
+        if (player.userId !== currentTurnPlayerId) {
             return player;
         }
 
+        console.log('performMoveOnPlayersCards',
+            player.userId,
+            currentTurnPlayerId,
+            moveAction,
+            {
+                before: player.userCardsIds,
+                after: player.userCardsIds.filter(userCardId => userCardId !== moveAction.from.cardId)
+            }
+        );
+
+
         return {
             ...player,
-            userCards: player.userCards.filter(userCard => userCard.id !== moveAction.from.cardId)
+            userCardsIds: player.userCardsIds.filter(userCardId => userCardId !== moveAction.from.cardId)
         };
     });
 }

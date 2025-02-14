@@ -19,3 +19,7 @@ export function groupByToMap<T, K>(array: T[], key: (item: T) => K): Map<K, T[]>
         return result;
     }, new Map<K, T[]>());
 }
+
+export function getRandomElement<T>(array: T[]): T {
+    return array[Math.floor(Math.random() * array.length)];
+}

@@ -25,7 +25,7 @@ class BoardManager {
     }
 
     private static isNumberGroupValid(numberGroup: CardNumberGroup): boolean {
-        const amountOfCardsInNumberGroup = numberGroup.slots.filter(slot => slot.card).length;
+        const amountOfCardsInNumberGroup = numberGroup.slots.filter(slot => slot.cardId).length;
         // should be empty or have atleast 3 cards  
         return amountOfCardsInNumberGroup === 0 || amountOfCardsInNumberGroup >= 3;
     }
@@ -35,7 +35,7 @@ class BoardManager {
 
         for (let index = 0; index < run.slots.length; index++) {
             const slot = run.slots[index];
-            if (slot.card) {
+            if (slot.cardId) {
                 currentSetSize++;
             } else {
                 if (currentSetSize !== 0 && currentSetSize < 3) {

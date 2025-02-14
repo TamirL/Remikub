@@ -4,33 +4,35 @@ import type { Board, CardNumberGroup, CardRun, CardSlotData } from "../board";
 import { allCardsById, canPutRealCardOnSlot, cardColorComparator, type CardType, type JokerCardColor, type NumberCardColor, type RealCardData } from "../cards";
 import type { CardMoveAction } from "../gameActions";
 import type UpdateManager from "./updateManager.svelte";
+import type { GameFromPlayerPerspective } from "../game";
+import type { InProgressGameUpdate } from "../updates";
 
 class GameManager {
-    private _updateManager: UpdateManager;
-    private _isBoardValid: boolean = $derived.by(() => !!this._updateManager.gameData.board && GameManager.calcIsBoardValid(this._updateManager.gameData.board));
+    private _updateManager: UpdateManager<GameFromPlayerPerspective, InProgressGameUpdate>;
+    private _isBoardValid: boolean = $derived.by(() => !!this._updateManager.mostRecentData.board && GameManager.calcIsBoardValid(this._updateManager.mostRecentData.board));
 
-    constructor(updateManager: UpdateManager) {
+    constructor(updateManager: UpdateManager<GameFromPlayerPerspective, InProgressGameUpdate>) {
         this._updateManager = updateManager;
     }
 
     get gameId(): string {
-        return this._updateManager.gameData.id;
+        return this._updateManager.mostRecentData.id;
     }
 
     get players() {
-        return this._updateManager.gameData.players;
+        return this._updateManager.mostRecentData.players;
     }
 
     get board() {
-        return this._updateManager.gameData.board;
+        return this._updateManager.mostRecentData.board;
     }
 
     get userCards() {
-        return this._updateManager.gameData.userCardsIds.map(cardId => allCardsById.get(cardId)).filter(card => !!card) as RealCardData[];
+        return this._updateManager.mostRecentData.userCardsIds.map(cardId => allCardsById.get(cardId)).filter(card => !!card) as RealCardData[];
     }
 
     get deckSize() {
-        return this._updateManager.gameData.deckSize;
+        return this._updateManager.mostRecentData.deckSize;
     }
 
     moveCardFromSlot(from: CardSlotData, to: CardSlotData): void {
@@ -88,7 +90,7 @@ class GameManager {
     }
 
     drawCardFromDeck() {
-        if (this._updateManager.gameData.deckSize <= 0) {
+        if (this._updateManager.mostRecentData.deckSize <= 0) {
             console.error('Deck is empty');
             throw new Error('Deck is empty');
         }
@@ -134,8 +136,8 @@ class GameManager {
 
     getMinimalVisibleBoard(currentlyDraggedCard: RealCardData | null): Board {
         return {
-            numberGroups: GameManager.getOnlyBoardsNumberThatShouldBeVisible(this._updateManager.gameData.board.numberGroups, currentlyDraggedCard),
-            runs: GameManager.getOnlyBoardsRunsThatShouldBeVisible(this._updateManager.gameData.board.runs, currentlyDraggedCard)
+            numberGroups: GameManager.getOnlyBoardsNumberThatShouldBeVisible(this._updateManager.mostRecentData.board.numberGroups, currentlyDraggedCard),
+            runs: GameManager.getOnlyBoardsRunsThatShouldBeVisible(this._updateManager.mostRecentData.board.runs, currentlyDraggedCard)
         };
 
     }

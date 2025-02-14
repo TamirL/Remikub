@@ -12,6 +12,12 @@ export type GameFromPlayerPerspective = {
     userCardsIds: number[];
 }
 
+export type GameLobbyFromUserPerspective = {
+    id: string;
+    players: User[];
+    amIParticipating: boolean;
+}
+
 export type GameContext = {
     gameManager: GameManager;
 }

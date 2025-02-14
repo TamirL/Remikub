@@ -3,11 +3,11 @@ import type { GameUpdate } from "../updates";
 import { source, type Source } from 'sveltekit-sse'
 
 
-export default class UpdateManager {
-    private _gameData: GameFromPlayerPerspective = $state({} as GameFromPlayerPerspective);
+export default class UpdateManager<TData, TUpdateObject extends GameUpdate<TData>> {
+    private _data: TData = $state({} as TData);
 
-    constructor(initialGameData: GameFromPlayerPerspective, updateEventSource: Source | null) {
-        this._gameData = initialGameData;
+    constructor(initialGameData: TData, updateEventSource: Source | null) {
+        this._data = initialGameData;
         console.log('UpdateManager.constructor');
 
         updateEventSource?.select('message').subscribe((data) => {
@@ -18,13 +18,12 @@ export default class UpdateManager {
                 return;
             }
 
-            const gameUpdate: GameUpdate = JSON.parse(data);
-            return this._gameData = gameUpdate.updatedGameData;
+            const gameUpdate: TUpdateObject = JSON.parse(data);
+            return this._data = gameUpdate.data;
         });
-
     }
 
-    public get gameData(): GameFromPlayerPerspective {
-        return this._gameData;
+    public get mostRecentData(): TData {
+        return this._data;
     }
 }

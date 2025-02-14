@@ -31,12 +31,12 @@ export const actions: Actions = {
 
         const user = await createOrUpdateUser(cookies.get('userId') ?? null, userName);
 
-        const game = await createGame([user]);
+        const game = await createGame(user.id);
         await storeGame(game);
 
-        redirect(303, '/game/' + game.id);
+        redirect(303, '/game/' + game.id + '/lobby');
     },
-    'join-game': async ({ request, cookies }) => {
+    'join-lobby': async ({ request, cookies }) => {
         const formData = await request.formData();
         const userName = formData.get('userName');
         if (!userName || typeof userName !== 'string') {
@@ -50,6 +50,6 @@ export const actions: Actions = {
 
         const user = await createOrUpdateUser(cookies.get('userId') ?? null, userName);
 
-        redirect(201, '/game/' + gameId);
+        redirect(303, '/game/' + gameId + '/lobby');
     }
 };
