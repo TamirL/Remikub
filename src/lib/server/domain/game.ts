@@ -78,6 +78,7 @@ export async function getGameLobbyFromUserPerspective(game: Game, userId: string
     return {
         id: game.id,
         players: users,
-        amIParticipating: users.some(u => u.id === userId)
+        hasStarted: game.hasStarted,
+        amIParticipating: users.some(u => u.id === userId),
     };
 }

@@ -3,9 +3,16 @@
 	import type { GameLobbyFromUserPerspective } from '$lib/domain/game';
 	import UpdateManager from '$lib/domain/managers/updateManager.svelte';
 	import { source } from 'sveltekit-sse';
+	import { goto } from '$app/navigation';
 
 	const { data }: { data: GameLobbyFromUserPerspective } = $props();
 	const updateManager = new UpdateManager(data, source(`/api/game/${data.id}/lobby/updates`));
+
+	$effect(() => {
+		if (updateManager.mostRecentData.hasStarted) {
+			goto(`/game/${data.id}`);
+		}
+	});
 </script>
 
 <h1>
@@ -21,7 +28,7 @@
 		<form action="?/join-game" method="POST">
 			<Button>Join</Button>
 		</form>
-	{:else if updateManager.mostRecentData.players.length > 2}
+	{:else if updateManager.mostRecentData.players.length >= 2}
 		<form action="?/start-game" method="POST">
 			<Button>Start Game!</Button>
 		</form>

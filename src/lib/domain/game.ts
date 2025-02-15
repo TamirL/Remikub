@@ -16,6 +16,7 @@ export type GameLobbyFromUserPerspective = {
     id: string;
     players: User[];
     amIParticipating: boolean;
+    hasStarted: boolean;
 }
 
 export type GameContext = {
