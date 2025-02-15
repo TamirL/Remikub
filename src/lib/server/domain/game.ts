@@ -63,6 +63,7 @@ export async function getGameFromUserPerspective(game: Game, userId: string): Pr
         id: game.id,
         players: users,
         currentTurnUserId: game.currentTurnPlayerId,
+        isItMyTurn: game.currentTurnPlayerId === userId,
         board: game.board,
         deckSize: game.deck.length,
         userCardsIds: player.userCardsIds

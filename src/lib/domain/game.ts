@@ -7,6 +7,7 @@ export type GameFromPlayerPerspective = {
     id: string;
     players: User[];
     currentTurnUserId: string;
+    isItMyTurn: boolean;
     board: Board;
     deckSize: number;
     userCardsIds: number[];

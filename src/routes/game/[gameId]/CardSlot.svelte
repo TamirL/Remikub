@@ -12,9 +12,11 @@
 	let isCardOverThisSlot = $state(false);
 
 	const amIAvailableForDraggedCard = $derived(
-		!slot.cardId ||
-			(!!dragDropContext.draggedCard && slot.cardId === dragDropContext.draggedCard.id)
+		gameContext.gameManager.isItMyTurn &&
+			(!slot.cardId ||
+				(!!dragDropContext.draggedCard && slot.cardId === dragDropContext.draggedCard.id))
 	);
+
 	const isMatchingCardDragged = $derived(
 		!!dragDropContext.draggedCard &&
 			canPutRealCardOnSlot(dragDropContext.draggedCard, slot.expectedCard)
@@ -26,12 +28,19 @@
 	const highlight = $derived(amIAvailableForDraggedCard && isMatchingCardDragged);
 
 	function handleDragEnter(event: DragEvent) {
+		if (!gameContext.gameManager.isItMyTurn) {
+			return;
+		}
+
 		event.preventDefault();
 		isCardOverThisSlot = true;
 	}
 
 	function handleDragLeave(event: DragEvent) {
-		event.preventDefault();
+		if (gameContext.gameManager.isItMyTurn) {
+			event.preventDefault();
+		}
+
 		isCardOverThisSlot = false;
 	}
 
@@ -40,6 +49,11 @@
 		isCardOverThisSlot = false;
 		if (!dragDropContext.draggedCard) {
 			console.error('No card to drop');
+			return;
+		}
+
+		if (!gameContext.gameManager.isItMyTurn) {
+			console.log('Not your turn');
 			return;
 		}
 

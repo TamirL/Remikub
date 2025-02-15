@@ -4,14 +4,18 @@
 	import { getGameContext } from '$lib/domain/game';
 	import CardSlot from './CardSlot.svelte';
 
-	const minimalVisibleBoard = $derived(
-		getGameContext().gameManager.getMinimalVisibleBoard(getCardDragDropContext().draggedCard)
-	);
-
 	let gameManager = getGameContext().gameManager;
 
+	const minimalVisibleBoard = $derived(
+		getGameContext().gameManager.getMinimalVisibleBoard(
+			gameManager.isItMyTurn ? getCardDragDropContext().draggedCard : null
+		)
+	);
+
 	function onDragOver(event: DragEvent) {
-		event.preventDefault();
+		if (gameManager.isItMyTurn) {
+			event.preventDefault();
+		}
 	}
 
 	function onDrop(event: DragEvent) {

@@ -5,7 +5,6 @@
 </script>
 
 <div class="main">
-	<Header />
 	{@render children()}
 </div>
 

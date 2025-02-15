@@ -23,6 +23,10 @@ class GameManager {
         return this._updateManager.mostRecentData.players;
     }
 
+    get currentTurnUserId() {
+        return this._updateManager.mostRecentData.currentTurnUserId;
+    }
+
     get board() {
         return this._updateManager.mostRecentData.board;
     }
@@ -33,6 +37,10 @@ class GameManager {
 
     get deckSize() {
         return this._updateManager.mostRecentData.deckSize;
+    }
+
+    get isItMyTurn() {
+        return this._updateManager.mostRecentData.isItMyTurn
     }
 
     moveCardFromSlot(from: CardSlotData, to: CardSlotData): void {
