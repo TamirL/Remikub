@@ -22,7 +22,7 @@
 	const enableButton = $derived(isItMyTurn && hasPlayerMadeContributions && isBoardValid);
 </script>
 
-<form action={`/game/${gameContext.gameManager.gameId}?/finish-turn`} method="POST">
+<form action={`?/finish-turn`} method="POST">
 	<Button type="submit" disabled={!enableButton}>
 		Finish Turn
 	</Button>

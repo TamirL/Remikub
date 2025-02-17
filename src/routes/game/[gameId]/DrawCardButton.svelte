@@ -4,7 +4,9 @@
 
 	const gameContext = getGameContext();
 
-	const buttonEnabled = gameContext.gameManager.isItMyTurn;
+	const buttonEnabled = $derived(gameContext.gameManager.isItMyTurn);
+
+	$inspect(buttonEnabled);
 
 	function drawCard() {
 		fetch(`/game/$`, {
@@ -13,7 +15,7 @@
 	}
 </script>
 
-<form action="/game/{gameContext.gameManager.gameId}?/draw-card">
+<form action="?/draw-card" method="POST">
 	<Button type="submit" disabled={!buttonEnabled}
 		>Draw Card - {gameContext.gameManager.deckSize}</Button
 	>

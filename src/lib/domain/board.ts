@@ -36,7 +36,7 @@ export function hasUserMadeContributionsToTheTable(currentCards: RelevantCardsFo
 
     // Check the player has less cards in their hand than they did at the start of the turn
     if (currentCards.playerCardIds.length >= cardsAtTheStartOfTheTurn.playerCardIds.length) {
-        console.log("hasUserMadeContributionsToTheTable currentCards.playerCardIds.length", currentCards.playerCardIds.length, cardsAtTheStartOfTheTurn.playerCardIds.length);
+        console.log("hasUserMadeContributionsToTheTable currentCards.playerCardIds.length", currentCards.playerCardIds, cardsAtTheStartOfTheTurn.playerCardIds);
         return false;
     }
 

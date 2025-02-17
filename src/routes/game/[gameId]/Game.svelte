@@ -34,7 +34,7 @@
 		return hasUserMadeContributions && gameContext.gameManager.isBoardValid;
 	});
 
-	const isItMyTurn = gameContext.gameManager.isItMyTurn;
+	const isItMyTurn = $derived(gameContext.gameManager.isItMyTurn);
 </script>
 
 <div class="game">

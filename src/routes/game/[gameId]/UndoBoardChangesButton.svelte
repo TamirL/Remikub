@@ -23,6 +23,6 @@
 	});
 </script>
 
-<form action={`/game/${gameContext.gameManager.gameId}?/undo-board-changes`} method="POST">
+<form action={`?/undo-board-changes`} method="POST">
 	<Button type="submit" disabled={!enableButton}>Undo</Button>
 </form>

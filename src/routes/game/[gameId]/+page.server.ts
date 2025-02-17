@@ -79,6 +79,7 @@ export const actions = {
 
         let updatedGame = undoBoardChanges(game);
         updatedGame = drawCard(updatedGame);
+        updatedGame = moveToTheNextPerson(updatedGame);
 
         storeGame(updatedGame);
         broadcastGameUpdate('undo-user-changes', updatedGame);
