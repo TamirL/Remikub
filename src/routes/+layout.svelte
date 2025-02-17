@@ -15,4 +15,11 @@
 		flex-direction: column;
 		height: 100vh;
 	}
+
+	:root {
+		--yellow-card-color: #f68230;
+		--blue-card-color: #1148ec;
+		--red-card-color: #be0509;
+		--black-card-color: #020300;
+	}
 </style>

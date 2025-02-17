@@ -47,23 +47,23 @@ export function getCssCardColor(cardData: CardData) {
 
 function getNumberCardColorForCss(color: NumberCardColor) {
     switch (color) {
-        case 'red':
-            return '#be0509';
-        case 'blue':
-            return '#1148ec';
         case 'yellow':
-            return '#f68230';
+            return 'var(--yellow-card-color)';
+        case 'blue':
+            return 'var(--blue-card-color)';
+        case 'red':
+            return 'var(--red-card-color)';
         case 'black':
-            return '#020300';
+            return 'var(--black-card-color)';
     }
 }
 
 function getJokerCardColorForCss(color: JokerCardColor) {
     switch (color) {
         case 'red':
-            return '#be0509';
+            return 'var(--red-card-color)';
         case 'black':
-            return '#020300';
+            return 'var(--black-card-color)';
     }
 }
 
