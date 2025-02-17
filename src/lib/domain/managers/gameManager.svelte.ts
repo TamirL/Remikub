@@ -4,7 +4,7 @@ import type { Board, CardNumberGroup, CardRun, CardSlotData } from "../board";
 import { allCardsById, canPutRealCardOnSlot, cardColorComparator, type CardType, type JokerCardColor, type NumberCardColor, type RealCardData } from "../cards";
 import type { CardMoveAction } from "../gameActions";
 import type UpdateManager from "./updateManager.svelte";
-import type { GameFromPlayerPerspective } from "../game";
+import type { GameFromPlayerPerspective, RelevantCardsForPlayerTurn } from "../game";
 import type { InProgressGameUpdate } from "../updates";
 
 class GameManager {
@@ -41,6 +41,10 @@ class GameManager {
 
     get isItMyTurn() {
         return this._updateManager.mostRecentData.isItMyTurn
+    }
+
+    get beforePlayerChangesData(): RelevantCardsForPlayerTurn | null {
+        return this._updateManager.mostRecentData.beforePlayerChangesData;
     }
 
     moveCardFromSlot(from: CardSlotData, to: CardSlotData): void {
@@ -95,15 +99,6 @@ class GameManager {
         });
 
         return true;
-    }
-
-    drawCardFromDeck() {
-        if (this._updateManager.mostRecentData.deckSize <= 0) {
-            console.error('Deck is empty');
-            throw new Error('Deck is empty');
-        }
-
-        // TODO: Implement
     }
 
     getUserCardsIdsOrderdByColor() {

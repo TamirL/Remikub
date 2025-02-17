@@ -19,5 +19,10 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
+
+		&:disabled {
+			background-color: #666666;
+			cursor: not-allowed;
+		}
 	}
 </style>

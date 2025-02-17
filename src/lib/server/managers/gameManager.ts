@@ -23,7 +23,7 @@ class GameManager {
     // User Cards Management
     private addCardToUserCards(userId: string, card: RealCardData): void {
         // TODO: Add proper user management
-        const user = this._game.players.find(p => p.userId === userId);
+        const user = this._game.players.get(userId);
 
         if (!user) {
             throw new Error('User not found');
@@ -35,7 +35,7 @@ class GameManager {
 
     removeCardFromUserCards(userId: string, card: RealCardData): void {
         // TODO: Add proper user management
-        const user = this._game.players.find(p => p.userId === userId);
+        const user = this._game.players.get(userId);
 
         if (!user) {
             throw new Error('User not found');

@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { RealCardData } from '$lib/domain/cards';
 	import DragabbleCard from '$lib/components/DragabbleCard.svelte';
-	import DrawCardButton from './DrawCardButton.svelte';
 	import OrderByColorButton from './OrderByColorButton.svelte';
 	import OrderByNumberButton from './OrderByNumberButton.svelte';
 
@@ -14,12 +13,9 @@
 			<DragabbleCard cardData={card} draggedFrom={null} />
 		{/each}
 	</div>
-	<div class="user-cards-buttons">
-		<div class="user-cards-order-buttons">
-			<OrderByNumberButton />
-			<OrderByColorButton />
-		</div>
-		<DrawCardButton />
+	<div class="user-cards-order-buttons">
+		<OrderByNumberButton />
+		<OrderByColorButton />
 	</div>
 </div>
 
@@ -27,6 +23,8 @@
 	.user-cards-container {
 		display: flex;
 		flex-direction: row;
+
+		flex: 1;
 	}
 
 	.user-cards {
@@ -42,7 +40,7 @@
 		flex: 1;
 	}
 
-	.user-cards-buttons {
+	.user-cards-order-buttons {
 		flex: 0 0 auto;
 		display: flex;
 		flex-direction: row;

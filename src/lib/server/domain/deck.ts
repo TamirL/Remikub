@@ -1,7 +1,8 @@
+import { toShuffledArray } from "$lib/utils/arrayUtils";
 import { allCards, type RealCardData } from "../../domain/cards";
 
-export function createDeck(): RealCardData[] {
-    return allCards.sort(() => Math.random() - 0.5);
+export function createShuffledDeck(): RealCardData[] {
+    return toShuffledArray(allCards);
 }
 
 export function drawCard(deck: RealCardData[]): RealCardData {

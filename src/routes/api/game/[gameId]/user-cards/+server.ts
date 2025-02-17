@@ -4,6 +4,7 @@ import { isSetsEqual } from "$lib/utils/setUtils";
 import type { RequestHandler } from "@sveltejs/kit";
 import { broadcastGameUpdate } from "../updates/gameUpdatePusher";
 import type { ReorderUserCardsAction } from "$lib/domain/gameActions";
+import { updatePlayersData } from "$lib/server/domain/players";
 
 export const POST: RequestHandler = async ({ request, params, cookies }) => {
     const userId = cookies.get('userId');
@@ -12,7 +13,7 @@ export const POST: RequestHandler = async ({ request, params, cookies }) => {
         return new Response(null, { status: 401 });
     }
 
-    const gameId = params.gameId;
+    const { gameId } = params;
 
     if (!gameId) {
         return new Response(null, { status: 400 });
@@ -24,9 +25,8 @@ export const POST: RequestHandler = async ({ request, params, cookies }) => {
         return new Response(null, { status: 404 });
     }
 
-    const thisPlayer = game.players.find(p => {
-        return p.userId === userId;
-    });
+    const thisPlayer = game.players.get(userId
+    );
 
     if (!isSetsEqual(new Set(thisPlayer?.userCardsIds), new Set(thisPlayer?.userCardsIds))) {
         return new Response(null, { status: 400 });
@@ -48,20 +48,19 @@ function performUserCardsReorder(game: Game, userId: string, newCardIdsOrder: nu
         initiatingPlayerId: game.initiatingPlayerId,
         currentTurnPlayerId: game.currentTurnPlayerId,
         deck: game.deck,
+        beforePlayerChangesData: game.beforePlayerChangesData,
         players: reorderUserCards(game.players, userId, newCardIdsOrder),
         board: game.board,
     })
 }
 
-function reorderUserCards(players: PlayerInGame[], userId: string, newCardIdsOrder: number[]): PlayerInGame[] {
-    return players.map(player => {
-        if (player.userId !== userId) {
-            return player;
-        }
+function reorderUserCards(players: Map<string, PlayerInGame>, userId: string, newCardIdsOrder: number[]): Map<string, PlayerInGame> {
 
+    return updatePlayersData(players, userId, (player) => {
         return {
             userId: player.userId,
             userCardsIds: newCardIdsOrder,
         };
     });
+
 }

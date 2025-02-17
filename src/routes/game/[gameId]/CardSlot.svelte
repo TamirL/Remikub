@@ -53,7 +53,7 @@
 		}
 
 		if (!gameContext.gameManager.isItMyTurn) {
-			console.log('Not your turn');
+			console.error('Not your turn');
 			return;
 		}
 

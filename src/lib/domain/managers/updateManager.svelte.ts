@@ -8,11 +8,7 @@ export default class UpdateManager<TData, TUpdateObject extends GameUpdate<TData
 
     constructor(initialGameData: TData, updateEventSource: Source | null) {
         this._data = initialGameData;
-        console.log('UpdateManager.constructor');
-
         updateEventSource?.select('message').subscribe((data) => {
-            console.log('UpdateManager.onMessage', { data });
-
             if (!data) {
                 console.log('No data in message');
                 return;

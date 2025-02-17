@@ -1,18 +1,18 @@
 import type { User } from "$lib/domain/user";
 import type { RealCardData } from "$lib/domain/cards";
 import type { Board } from "$lib/domain/board";
-import { createDeck } from "$lib/server/domain/deck";
+import { createShuffledDeck } from "$lib/server/domain/deck";
 import { createEmptyBoard } from "./board";
-import type { GameFromPlayerPerspective, GameLobbyFromUserPerspective } from "$lib/domain/game";
+import type { GameFromPlayerPerspective, GameLobbyFromUserPerspective, RelevantCardsForPlayerTurn } from "$lib/domain/game";
 import { getUser } from "../storage/users";
-
 export type Game = {
     hasStarted: boolean;
     id: string;
     initiatingPlayerId: string;
-    players: PlayerInGame[];
+    players: Map<string, PlayerInGame>;
     currentTurnPlayerId: string;
     board: Board;
+    beforePlayerChangesData: RelevantCardsForPlayerTurn;
     deck: RealCardData[];
 }
 
@@ -22,21 +22,27 @@ export type PlayerInGame = {
 }
 
 export function createGame(initiatingPlayerId: string): Game {
-    const deck = createDeck();
+    const deck = createShuffledDeck();
+    console.log('createGame', deck.map(c => c.id).join(', '));
     const userCardsIds = deck.splice(0, 14).map(c => c.id);
+    const player: PlayerInGame = { userId: initiatingPlayerId, userCardsIds };
+
+    console.log('createGame', deck.length, userCardsIds.length);
+
 
     return {
         id: createJoinCode(),
         hasStarted: false,
         initiatingPlayerId,
-        players: [
-            {
-                userId: initiatingPlayerId,
-                userCardsIds,
-            }
-        ],
+        players: new Map<string, PlayerInGame>(
+            [[initiatingPlayerId, player]]
+        ),
         currentTurnPlayerId: initiatingPlayerId,
         board: createEmptyBoard(),
+        beforePlayerChangesData: {
+            board: createEmptyBoard(),
+            playerCardIds: userCardsIds
+        },
         deck: deck
     };
 }
@@ -47,30 +53,33 @@ function createJoinCode(): string {
 }
 
 export async function getGameFromUserPerspective(game: Game, userId: string): Promise<GameFromPlayerPerspective> {
-    const player = game.players.find(p => p.userId === userId);
+    const player = game.players.get(userId);
 
     if (!player) {
         throw new Error('Forbidden');
     }
 
-    const users = await Promise.all(game.players.map(p => getUser(p.userId)));
+    const users = await Promise.all(game.players.keys().map(userId => getUser(userId)));
 
     if (!users.every((user): user is User => !!user)) {
         throw new Error('Forbidden');
     }
 
+    const isItMyTurn = game.currentTurnPlayerId === userId;
+
     return {
         id: game.id,
         players: users,
         currentTurnUserId: game.currentTurnPlayerId,
-        isItMyTurn: game.currentTurnPlayerId === userId,
+        isItMyTurn: isItMyTurn,
         board: game.board,
         deckSize: game.deck.length,
-        userCardsIds: player.userCardsIds
+        userCardsIds: player.userCardsIds,
+        beforePlayerChangesData: isItMyTurn ? game.beforePlayerChangesData : null
     };
 }
 export async function getGameLobbyFromUserPerspective(game: Game, userId: string): Promise<GameLobbyFromUserPerspective> {
-    const users = await Promise.all(game.players.map(p => getUser(p.userId)));
+    const users = await Promise.all(game.players.keys().map(userId => getUser(userId)));
 
     if (!users.every((user): user is User => !!user)) {
         throw new Error('Forbidden');

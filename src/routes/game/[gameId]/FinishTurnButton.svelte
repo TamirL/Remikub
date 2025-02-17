@@ -1,0 +1,29 @@
+<script lang="ts">
+	import { page } from '$app/state';
+	import Button from '$lib/components/Button.svelte';
+	import { hasUserMadeContributionsToTheTable } from '$lib/domain/board';
+	import { getGameContext } from '$lib/domain/game';
+
+	const gameContext = getGameContext();
+
+	const hasPlayerMadeContributions = $derived.by(() =>
+		hasUserMadeContributionsToTheTable(
+			{
+				board: gameContext.gameManager.board,
+				playerCardIds: gameContext.gameManager.userCards.map((p) => p.id)
+			},
+			gameContext.gameManager.beforePlayerChangesData
+		)
+	);
+
+	const isBoardValid = gameContext.gameManager.isBoardValid;
+	const isItMyTurn = gameContext.gameManager.isItMyTurn;
+
+	const enableButton = $derived(isItMyTurn && hasPlayerMadeContributions && isBoardValid);
+</script>
+
+<form action={`/game/${gameContext.gameManager.gameId}?/finish-turn`} method="POST">
+	<Button type="submit" disabled={!enableButton}>
+		Finish Turn
+	</Button>
+</form>

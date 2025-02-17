@@ -4,6 +4,7 @@ import type { Game, PlayerInGame } from "$lib/server/domain/game";
 import { getGame, storeGame } from "$lib/server/storage/game";
 import { type RequestHandler } from "@sveltejs/kit";
 import { broadcastGameUpdate } from "../updates/gameUpdatePusher";
+import { updatePlayersData } from "$lib/server/domain/players";
 
 export const POST: RequestHandler = async ({ request, params, cookies }) => {
     const userId = cookies.get('userId');
@@ -12,7 +13,7 @@ export const POST: RequestHandler = async ({ request, params, cookies }) => {
         return new Response(null, { status: 401 });
     }
 
-    const gameId = params.gameId;
+    const { gameId } = params;
 
     if (!gameId) {
         return new Response(null, { status: 400 });
@@ -25,9 +26,7 @@ export const POST: RequestHandler = async ({ request, params, cookies }) => {
     }
 
 
-    const user = game?.players.find(p => {
-        return p.userId === userId;
-    });
+    const user = game?.players.get(userId);
 
     if (!user) {
         return new Response(null, { status: 403 });
@@ -52,32 +51,18 @@ function performMove(game: Game, userId: string, cardMoveAction: CardMoveAction)
         initiatingPlayerId: game.initiatingPlayerId,
         currentTurnPlayerId: game.currentTurnPlayerId,
         deck: game.deck,
+        beforePlayerChangesData: game.beforePlayerChangesData,
         players: performMoveOnPlayersCards(userId, game.players, cardMoveAction),
         board: performMoveOnBoard(game.board, cardMoveAction),
     })
 }
 
-function performMoveOnPlayersCards(currentTurnPlayerId: string, players: PlayerInGame[], moveAction: CardMoveAction): PlayerInGame[] {
-    return players.map((player): PlayerInGame => {
-        if (player.userId !== currentTurnPlayerId) {
-            return player;
-        }
-
-        console.log('performMoveOnPlayersCards',
-            player.userId,
-            currentTurnPlayerId,
-            moveAction,
-            {
-                before: player.userCardsIds,
-                after: player.userCardsIds.filter(userCardId => userCardId !== moveAction.from.cardId)
-            }
-        );
-
-
+function performMoveOnPlayersCards(currentTurnPlayerId: string, players: Map<string, PlayerInGame>, moveAction: CardMoveAction): Map<string, PlayerInGame> {
+    return updatePlayersData(players, currentTurnPlayerId, (player) => {
         return {
             ...player,
             userCardsIds: player.userCardsIds.filter(userCardId => userCardId !== moveAction.from.cardId)
-        };
+        }
     });
 }
 

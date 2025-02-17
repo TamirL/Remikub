@@ -7,7 +7,7 @@ export type GameUpdate<TData> = {
 }
 
 export type InProgressGameUpdate = GameUpdate<GameFromPlayerPerspective> & {
-    type: 'player-move' | 'user-cards-reorder',
+    type: 'player-move' | 'user-cards-reorder' | 'turn-finished' | 'undo-user-changes',
 }
 
 export type GameLobbyUpdate = GameUpdate<GameLobbyFromUserPerspective> & {
