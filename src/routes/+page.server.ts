@@ -3,6 +3,7 @@ import { fail, redirect, type Actions } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 import { createGame } from "$lib/server/domain/game";
 import { storeGame } from "$lib/server/storage/game";
+import { USER_ID_COOKIE_FIELD } from "$lib/domain/user";
 
 export const load: PageServerLoad = async ({ cookies }) => {
     const userId = cookies.get('userId');
@@ -15,7 +16,7 @@ export const load: PageServerLoad = async ({ cookies }) => {
         }
     }
 
-    cookies.set('userId', user.id, { path: '/' });
+    cookies.set(USER_ID_COOKIE_FIELD, user.id, { path: '/', httpOnly: false });
 
     return user;
 }

@@ -8,6 +8,7 @@
 	import { areBoardsEqual, hasUserMadeContributionsToTheTable } from '$lib/domain/board';
 	import FinishTurnButton from './FinishTurnButton.svelte';
 	import DrawCardButton from './DrawCardButton.svelte';
+	import PlayersPanel from '$lib/components/PlayersPanel.svelte';
 
 	const dragDropContext = $state({ draggedCard: null, draggedFrom: null });
 	setCardDragDropContext(dragDropContext);
@@ -40,12 +41,10 @@
 	<div class="top-part">
 		<Board />
 		<div class="players-side-panel">
-			{#each gameContext.gameManager.players as player}
-				<PlayerCard
-					{player}
-					isItTheirTurn={player.id === gameContext.gameManager.currentTurnUserId}
-				/>
-			{/each}
+			<PlayersPanel
+				players={gameContext.gameManager.players}
+				currentTurnUserId={gameContext.gameManager.currentTurnUserId}
+			/>
 		</div>
 	</div>
 	<div class="bottom-part">
