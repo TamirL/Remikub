@@ -7,9 +7,6 @@ export type CardType = 'number' | 'joker';
 export type NumberCardColor = 'red' | 'blue' | 'yellow' | 'black';
 export type JokerCardColor = 'red' | 'black';
 
-const cardColorsOrder: (NumberCardColor | JokerCardColor)[] = ['yellow', 'blue', 'red', 'black'];
-export const cardColorComparator: Comparator<NumberCardColor | JokerCardColor> = compare.unionType(cardColorsOrder);
-
 type BaseCardData = {
     type: CardType;
 }
@@ -32,7 +29,7 @@ export type RealJokerCardData = BaseCardData & BaseRealCardData & {
     color: JokerCardColor;
 };
 
-export type RealCardData = RealNumberCardData | RealJokerCardData
+export type RealCardData = RealNumberCardData | RealJokerCardData;
 export type CardData = NumberCardData | RealCardData;
 
 export function getCssCardColor(cardData: CardData) {
@@ -150,3 +147,27 @@ export const allCards: RealCardData[] = [
 ];
 
 export const allCardsById = new Map(allCards.map(card => [card.id, card]));
+
+export const cardByTypeComperator = compare.byField<RealCardData, CardType>(card => card.type, compare.unionType(['number', 'joker']))
+const cardColorComperator: Comparator<NumberCardColor | JokerCardColor> = compare.unionType(['yellow', 'blue', 'red', 'black']);
+export const cardByColorComparator: Comparator<RealCardData> = compare.byField(card => card.color, cardColorComperator);
+
+export const cardByValueComparator: Comparator<RealCardData> = compare.fromCompareFunction((card1: RealCardData, card2: RealCardData): number => {
+    if (card1.type === 'number' && card2.type === 'number') {
+        return card1.numericValue - card2.numericValue;
+    }
+
+    if (card1.type === 'joker' && card2.type === 'joker') {
+        if (card1.color === 'red') {
+            return -1;
+        }
+
+        return 1;
+    }
+
+    if (card1.type === 'joker') {
+        return -1;
+    }
+
+    return 1;
+});

@@ -4,12 +4,11 @@
 	import { allCardsById, canPutRealCardOnSlot, getCardDragDropContext } from '$lib/domain/cards';
 	import { getGameContext } from '$lib/domain/game';
 	import DragabbleCard from '$lib/components/DragabbleCard.svelte';
+	import DragDropDropArea from '$lib/components/DragDropDropArea.svelte';
 
 	const { slot }: { slot: CardSlotData } = $props();
 	const dragDropContext = getCardDragDropContext();
 	const gameContext = getGameContext();
-
-	let isCardOverThisSlot = $state(false);
 
 	const amIAvailableForDraggedCard = $derived(
 		gameContext.gameManager.isItMyTurn &&
@@ -21,32 +20,10 @@
 		!!dragDropContext.draggedCard &&
 			canPutRealCardOnSlot(dragDropContext.draggedCard, slot.expectedCard)
 	);
-	const isMatchingCardOverThisSlot = $derived(
-		amIAvailableForDraggedCard && isMatchingCardDragged && isCardOverThisSlot
-	);
 
 	const highlight = $derived(amIAvailableForDraggedCard && isMatchingCardDragged);
 
-	function handleDragEnter(event: DragEvent) {
-		if (!gameContext.gameManager.isItMyTurn) {
-			return;
-		}
-
-		event.preventDefault();
-		isCardOverThisSlot = true;
-	}
-
-	function handleDragLeave(event: DragEvent) {
-		if (gameContext.gameManager.isItMyTurn) {
-			event.preventDefault();
-		}
-
-		isCardOverThisSlot = false;
-	}
-
-	function handleDrop(event: DragEvent) {
-		event.preventDefault();
-		isCardOverThisSlot = false;
+	function handleDrop() {
 		if (!dragDropContext.draggedCard) {
 			console.error('No card to drop');
 			return;
@@ -65,27 +42,30 @@
 	}
 </script>
 
-<div
-	class={[highlight ? 'highlighted' : '', isMatchingCardOverThisSlot ? 'matching-card-over' : '']}
-	role="region"
-	aria-label="Drop zone for card"
-	ondragenter={handleDragEnter}
-	ondrop={handleDrop}
-	ondragleave={handleDragLeave}
-	ondragover={(ev) => {
-		ev.preventDefault();
-	}}
+<DragDropDropArea
+	isAnyElementDragged={!!dragDropContext.draggedCard}
+	onElementDropped={handleDrop}
+	disableDragDrop={!gameContext.gameManager.isItMyTurn}
 >
-	<div class={dragDropContext.draggedCard ? 'is-any-card-dragged' : ''}>
-		{#if slot.cardId && allCardsById.has(slot.cardId)}
-			<DragabbleCard cardData={allCardsById.get(slot.cardId)!} draggedFrom={slot} />
-		{:else}
-			<div style:opacity={0.2}>
-				<Card cardData={slot.expectedCard} />
-			</div>
-		{/if}
-	</div>
-</div>
+	{#snippet content(isCardOverThisSlot)}
+		<div
+			class={[
+				highlight ? 'highlighted' : '',
+				amIAvailableForDraggedCard && isMatchingCardDragged && isCardOverThisSlot
+					? 'matching-card-over'
+					: ''
+			]}
+		>
+			{#if slot.cardId && allCardsById.has(slot.cardId)}
+				<DragabbleCard cardData={allCardsById.get(slot.cardId)!} draggedFrom={slot} />
+			{:else}
+				<div style:opacity={0.2}>
+					<Card cardData={slot.expectedCard} />
+				</div>
+			{/if}
+		</div>
+	{/snippet}
+</DragDropDropArea>
 
 <style>
 	.highlighted {
@@ -105,12 +85,5 @@
 	.matching-card-over {
 		transform: scale(1.2);
 		transition: transform 0.2s ease;
-	}
-
-	/* When any card is being dragged, we disable pointer events on all cards to prevent
-	   the dragenter/dragleave events from firing on the cards themselves instead of their containers.
-	   This ensures drag & drop works reliably when hovering over existing cards. */
-	.is-any-card-dragged {
-		pointer-events: none;
 	}
 </style>

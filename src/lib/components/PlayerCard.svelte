@@ -13,8 +13,9 @@
 		display: inline-block;
 		background-color: #333333;
 		border-radius: 5px;
-		padding: 10px;
+		padding: 6px;
 		text-align: center;
+		font-size: 12px;
 
 		& .name {
 			color: white;

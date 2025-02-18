@@ -23,5 +23,7 @@
 		align-items: stretch;
 
 		gap: 10px;
+
+		min-width: 80px;
 	}
 </style>

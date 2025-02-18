@@ -6,6 +6,9 @@ import type { PageServerLoad } from './$types';
 import { broadcastGameUpdate } from '../../api/game/[gameId]/updates/gameUpdatePusher';
 import { hasUserMadeContributionsToTheTable } from '$lib/domain/board';
 import { updatePlayersData } from '$lib/server/domain/players';
+import { isDefined } from '$lib/utils/utils';
+import { isSetsEqual } from '$lib/utils/setUtils';
+import type { UserCardId } from '$lib/domain/userCards';
 
 export const load: PageServerLoad = async ({ params, cookies }): Promise<GameFromPlayerPerspective> => {
     const userId = cookies.get('userId');
@@ -51,7 +54,7 @@ export const actions = {
             throw error(400, 'Board is not valid');
         }
 
-        if (!hasUserMadeContributionsToTheTable({ board: game.board, playerCardIds: currentPlayer.userCardsIds }, game.beforePlayerChangesData)) {
+        if (!hasUserMadeContributionsToTheTable({ board: game.board, playerCardIds: currentPlayer.userCardsIds.filter(isDefined) }, game.beforePlayerChangesData)) {
             throw error(400, 'You have not made any contributions to the table');
         }
 
@@ -131,7 +134,7 @@ function moveToTheNextPerson(game: Game): Game {
         deck: game.deck,
         beforePlayerChangesData: {
             board: game.board,
-            playerCardIds: nextPlayer.userCardsIds,
+            playerCardIds: nextPlayer.userCardsIds.filter(isDefined),
         },
         players: game.players,
         board: game.board,
@@ -139,6 +142,18 @@ function moveToTheNextPerson(game: Game): Game {
     }
 }
 function undoBoardChanges(game: Game): Game {
+    const userCardsBeforeChanges = new Set(game.beforePlayerChangesData.playerCardIds.filter(isDefined));
+    const userCardsAfterChanges = new Set(game.players.get(game.currentTurnPlayerId)?.userCardsIds.filter(isDefined) ?? []);
+
+    let userCardsAfterUndo: UserCardId[];
+
+    // If all that the user has done was shuffle his cards, don't return them to the old locations
+    if (isSetsEqual(userCardsBeforeChanges, userCardsAfterChanges)) {
+        userCardsAfterUndo = game.players.get(game.currentTurnPlayerId)?.userCardsIds ?? [];
+    } else {
+        userCardsAfterUndo = game.beforePlayerChangesData.playerCardIds;
+    }
+
     return {
         id: game.id,
         hasStarted: game.hasStarted,
@@ -150,7 +165,7 @@ function undoBoardChanges(game: Game): Game {
         players: updatePlayersData(game.players, game.currentTurnPlayerId, (player) => {
             return {
                 userId: player.userId,
-                userCardsIds: game.beforePlayerChangesData.playerCardIds,
+                userCardsIds: userCardsAfterUndo,
             };
         }),
         board: game.beforePlayerChangesData.board,
@@ -159,8 +174,6 @@ function undoBoardChanges(game: Game): Game {
 
 function drawCard(game: Game): Game {
     const [drawenCard, ...restOfDeck] = game.deck
-
-    console.log('drawCard', game.deck.length, restOfDeck.length, drawenCard);
 
     return {
         id: game.id,

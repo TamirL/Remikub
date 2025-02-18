@@ -5,6 +5,7 @@ import type { GameLobbyFromUserPerspective } from "$lib/domain/game";
 import { getUser } from "$lib/server/storage/users.js";
 import { broadcastGameLobbyUpdate } from "../../../api/game/[gameId]/lobby/updates/lobbyUpdatePusher.js";
 import { getRandomElement } from "$lib/utils/arrayUtils.js";
+import { isDefined } from "$lib/utils/utils.js";
 
 export async function load({ params, cookies }): Promise<GameLobbyFromUserPerspective> {
     const userId = cookies.get('userId');
@@ -101,8 +102,6 @@ export const actions = {
 function addPlayerToGame(game: Game, userId: string): Game {
     const userCards = game.deck.slice(0, 14);
     const restOfDeck = game.deck.slice(14);
-
-    console.log('adding player to game', game.deck.length, restOfDeck.length, userCards.length);
 
     const newPlayer: PlayerInGame = {
         userId,

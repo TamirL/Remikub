@@ -5,6 +5,8 @@ import { createShuffledDeck } from "$lib/server/domain/deck";
 import { createEmptyBoard } from "./board";
 import type { GameFromPlayerPerspective, GameLobbyFromUserPerspective, RelevantCardsForPlayerTurn } from "$lib/domain/game";
 import { getUser } from "../storage/users";
+import type { UserCardId } from "$lib/domain/userCards";
+
 export type Game = {
     hasStarted: boolean;
     id: string;
@@ -18,17 +20,17 @@ export type Game = {
 
 export type PlayerInGame = {
     userId: string;
-    userCardsIds: number[];
+    userCardsIds: UserCardId[];
 }
 
 export function createGame(initiatingPlayerId: string): Game {
     const deck = createShuffledDeck();
-    console.log('createGame', deck.map(c => c.id).join(', '));
+
     const userCardsIds = deck.splice(0, 14).map(c => c.id);
-    const player: PlayerInGame = { userId: initiatingPlayerId, userCardsIds };
-
-    console.log('createGame', deck.length, userCardsIds.length);
-
+    const player: PlayerInGame = {
+        userId: initiatingPlayerId,
+        userCardsIds: userCardsIds
+    };
 
     return {
         id: createJoinCode(),

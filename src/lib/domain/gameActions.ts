@@ -1,4 +1,5 @@
 import type { CardLocation, CardSlotLocation } from "./game";
+import type { UserCardId } from "./userCards";
 
 
 export type CardMoveAction = {
@@ -7,5 +8,5 @@ export type CardMoveAction = {
 };
 
 export type ReorderUserCardsAction = {
-    cardIdsNewOrder: number[];
+    cardIdsNewOrder: UserCardId[];
 };

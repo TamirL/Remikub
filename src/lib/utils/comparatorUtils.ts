@@ -11,7 +11,7 @@ export type Comparator<T> =
 
 export const compare = {
   byField<TObject, TField>(fieldGetter: (item: TObject) => TField, compareFunction: CompareFunction<TField>): Comparator<TObject> {
-    return wrapCompareFunction((item1: TObject, item2: TObject) => {
+    return compare.fromCompareFunction((item1: TObject, item2: TObject) => {
       return compareFunction(fieldGetter(item1), fieldGetter(item2));
     });
   },
@@ -28,7 +28,7 @@ export const compare = {
     caseFirst: 'upper' | 'lower' | false = 'upper',
     nullsFirst: boolean = false,
   ): Comparator<string | null | undefined> {
-    return wrapCompareFunction((str1: string | null | undefined, str2: string | null | undefined): number => {
+    return compare.fromCompareFunction((str1: string | null | undefined, str2: string | null | undefined): number => {
       if (str1 === null || str1 === undefined) {
         return nullsFirst ? -1 : 1;
       }
@@ -58,14 +58,14 @@ export const compare = {
   },
 
   booleans(trueFirst: boolean = true): Comparator<boolean> {
-    return wrapCompareFunction((first: boolean, second: boolean) => {
+    return compare.fromCompareFunction((first: boolean, second: boolean) => {
       const result = first === second ? 0 : first ? -1 : 1;
       return trueFirst ? result : -result;
     });
   },
 
   numbers: (): Comparator<number | undefined | null> => {
-    return wrapCompareFunction((num1: number | undefined | null, num2: number | undefined | null): number => {
+    return compare.fromCompareFunction((num1: number | undefined | null, num2: number | undefined | null): number => {
       return (num1 ?? 0) - (num2 ?? 0);
     });
   },
@@ -76,34 +76,34 @@ export const compare = {
 
   enum<T extends Record<string, string | number>>(enumVal: T): Comparator<T[keyof T]> {
     const values = Object.values(enumVal);
-    return wrapCompareFunction((val1: T[keyof T], val2: T[keyof T]): number => {
+    return compare.fromCompareFunction((val1: T[keyof T], val2: T[keyof T]): number => {
       return values.indexOf(val1) - values.indexOf(val2);
     });
   },
 
   unionType<T>(unionTypeOrder: T[]): Comparator<T> {
-    return wrapCompareFunction((val1: T, val2: T): number => {
+    return compare.fromCompareFunction((val1: T, val2: T): number => {
       return unionTypeOrder.indexOf(val1) - unionTypeOrder.indexOf(val2);
     });
   },
+
+  fromCompareFunction<T>(compareFunction: CompareFunction<T>): Comparator<T> {
+    const comparator = function (item1: T, item2: T): number {
+      return compareFunction(item1, item2);
+    };
+
+    comparator.reverse = function (): Comparator<T> {
+      return compare.fromCompareFunction((item1, item2) => {
+        return -compareFunction(item1, item2);
+      });
+    };
+
+    comparator.then = function (nextCompareFunction: CompareFunction<T>): Comparator<T> {
+      return compare.fromCompareFunction((item1, item2) => {
+        return compareFunction(item1, item2) || nextCompareFunction(item1, item2);
+      });
+    };
+
+    return comparator;
+  },
 };
-
-function wrapCompareFunction<T>(compareFunction: CompareFunction<T>): Comparator<T> {
-  const comparator = function (item1: T, item2: T): number {
-    return compareFunction(item1, item2);
-  };
-
-  comparator.reverse = function (): Comparator<T> {
-    return wrapCompareFunction((item1, item2) => {
-      return -compareFunction(item1, item2);
-    });
-  };
-
-  comparator.then = function (nextCompareFunction: CompareFunction<T>): Comparator<T> {
-    return wrapCompareFunction((item1, item2) => {
-      return compareFunction(item1, item2) || nextCompareFunction(item1, item2);
-    });
-  };
-
-  return comparator;
-}

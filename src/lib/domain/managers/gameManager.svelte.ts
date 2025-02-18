@@ -1,11 +1,14 @@
 import { groupByToMap } from "$lib/utils/arrayUtils";
 import { compare } from "$lib/utils/comparatorUtils";
 import type { Board, CardNumberGroup, CardRun, CardSlotData } from "../board";
-import { allCardsById, canPutRealCardOnSlot, cardColorComparator, type CardType, type JokerCardColor, type NumberCardColor, type RealCardData } from "../cards";
+import { allCardsById, canPutRealCardOnSlot, cardByColorComparator, cardByValueComparator, cardByTypeComperator, type CardType, type JokerCardColor, type NumberCardColor, type RealCardData, type RealNumberCardData } from "../cards";
 import type { CardMoveAction } from "../gameActions";
 import type UpdateManager from "./updateManager.svelte";
 import type { GameFromPlayerPerspective, RelevantCardsForPlayerTurn } from "../game";
 import type { InProgressGameUpdate } from "../updates";
+import { isDefined } from "$lib/utils/utils";
+import { orderUserCardsBySameComparator, type UserCard, type UserCardsOrdered } from "../userCards";
+``
 
 class GameManager {
     private _updateManager: UpdateManager<GameFromPlayerPerspective, InProgressGameUpdate>;
@@ -31,8 +34,14 @@ class GameManager {
         return this._updateManager.mostRecentData.board;
     }
 
-    get userCards() {
-        return this._updateManager.mostRecentData.userCardsIds.map(cardId => allCardsById.get(cardId)).filter(card => !!card) as RealCardData[];
+    get userCards(): UserCard[] {
+        return this._updateManager.mostRecentData.userCardsIds.map(userCardId => {
+            if (userCardId === null) {
+                return null;
+            }
+
+            return allCardsById.get(userCardId) ?? null;
+        });
     }
 
     get deckSize() {
@@ -102,40 +111,170 @@ class GameManager {
     }
 
     getUserCardsIdsOrderdByColor() {
-        return this.userCards.toSorted(
-            compare.byField<RealCardData, CardType>(card => card.type, compare.unionType(['number', 'joker']))
-                .then(compare.byField<RealCardData, NumberCardColor | JokerCardColor>(card => card.color, cardColorComparator))
-                .then(GameManager.compareCardsByCardValue))
-            .map(card => card.id);
+        const allUserCards = this.userCards.filter(isDefined);
+
+        // Next extract number groups from the leftover cards.
+        const { sets: runsSets, otherCards: cardsThatAreNotNumberGroups } = this.extractRuns(allUserCards);
+
+        // First extract valid runs.
+        const { sets: numberGoupSets, otherCards: cardsThatAreNotSets } = this.extractNumberGroups(cardsThatAreNotNumberGroups);
+
+        return orderUserCardsBySameComparator(
+            {
+                sets: [...numberGoupSets, ...runsSets],
+                otherCards: cardsThatAreNotSets
+            },
+            cardByTypeComperator
+                .then(cardByColorComparator)
+                .then(cardByValueComparator)
+        );
     }
 
-    getUserCardsIdsOrderdByValue() {
-        return this.userCards.toSorted(
-            compare.byField<RealCardData, CardType>(card => card.type, compare.unionType(['number', 'joker']))
-                .then(GameManager.compareCardsByCardValue)
-                .then(compare.byField<RealCardData, NumberCardColor | JokerCardColor>(card => card.color, cardColorComparator)))
-            .map(card => card.id);
+    getUserCardsIdsOrderdByValueAndSequentialOfSameColor() {
+        const allUserCards = this.userCards.filter(isDefined);
+        // First extract valid number groups.
+        const { sets: numberGoupSets, otherCards: notFormNumberGroup } = this.extractNumberGroups(allUserCards);
+
+        // Next extract runs from the leftover cards.
+        const { sets: runsSets, otherCards: cardsThatAreNotSets } = this.extractRuns(notFormNumberGroup);
+
+        const cardsBeforeStickingCardsOfTheSameColorCloser = orderUserCardsBySameComparator(
+            {
+                sets: [...numberGoupSets, ...runsSets],
+                otherCards: cardsThatAreNotSets
+            },
+            cardByTypeComperator
+                .then(cardByValueComparator)
+                .then(cardByColorComparator)
+        );
+
+
     }
 
-    private static compareCardsByCardValue(card1: RealCardData, card2: RealCardData): number {
-        if (card1.type === 'number' && card2.type === 'number') {
-            return card1.numericValue - card2.numericValue;
-        }
+    private extractNumberGroups(userCards: RealCardData[]): UserCardsOrdered {
+        const validGroups: RealCardData[][] = [];
+        const leftovers: RealCardData[] = [];
 
-        if (card1.type === 'joker' && card2.type === 'joker') {
-            if (card1.color === 'red') {
-                return -1;
+        // Group only number cards by their numeric value.
+        const numberCardsByValue = new Map<number, RealNumberCardData[]>();
+
+        for (const card of userCards) {
+            if (card.type === 'number') {
+                if (!numberCardsByValue.has(card.numericValue)) {
+                    numberCardsByValue.set(card.numericValue, []);
+                }
+                numberCardsByValue.get(card.numericValue)!.push(card);
+            } else {
+                // Non-number cards are not used to form number groups.
+                leftovers.push(card);
             }
-
-            return 1;
         }
 
-        if (card1.type === 'joker') {
-            return -1;
+        // Process each group: we want one card per distinct color.
+        for (const cards of numberCardsByValue.values()) {
+            const seenColors = new Set<string>();
+            const group: RealCardData[] = [];
+            for (const card of cards) {
+                if (!seenColors.has(card.color)) {
+                    seenColors.add(card.color);
+                    group.push(card);
+                } else {
+                    // Duplicate color – cannot use it in this group.
+                    leftovers.push(card);
+                }
+            }
+            // Valid group if at least 3 distinct colors.
+            if (group.length >= 3) {
+                validGroups.push(group);
+            } else {
+                leftovers.push(...group);
+            }
         }
 
-        return 1;
-    };
+        return { sets: validGroups, otherCards: leftovers, };
+    }
+
+    private extractRuns(userCards: RealCardData[]): UserCardsOrdered {
+        const validRuns: RealCardData[][] = [];
+        const leftovers: RealCardData[] = [];
+
+        // Group number cards by color (only number cards are considered for runs).
+        const cardsByColor = new Map<string, RealNumberCardData[]>();
+        for (const card of userCards) {
+            if (card.type === 'number') {
+                if (!cardsByColor.has(card.color)) {
+                    cardsByColor.set(card.color, []);
+                }
+                cardsByColor.get(card.color)!.push(card);
+            } else {
+                leftovers.push(card);
+            }
+        }
+
+        // For each color group, sort the cards and greedily extract runs.
+        for (const cards of cardsByColor.values()) {
+            // Create a working copy sorted by numericValue.
+            const sorted: RealNumberCardData[] = cards.slice().sort((a, b) => a.numericValue - b.numericValue);
+
+            // Continue forming runs as long as at least 3 cards remain.
+            while (sorted.length >= 3) {
+                const run: RealNumberCardData[] = [];
+                const indicesToRemove: number[] = [];
+
+                // Start a run with the first available card.
+                run.push(sorted[0]);
+                indicesToRemove.push(0);
+                let currentValue = sorted[0].numericValue;
+
+                // Look for the next consecutive numbers.
+                for (let i = 1; i < sorted.length; i++) {
+                    if (sorted[i].numericValue === currentValue + 1) {
+                        run.push(sorted[i]);
+                        currentValue = sorted[i].numericValue;
+                        indicesToRemove.push(i);
+                    }
+                }
+
+                if (run.length >= 3) {
+                    // A valid run is formed. Save it.
+                    validRuns.push(run);
+                    // Remove the used cards from the sorted array.
+                    // Remove in descending order to avoid index shift.
+                    indicesToRemove.sort((a, b) => b - a);
+                    for (const index of indicesToRemove) {
+                        sorted.splice(index, 1);
+                    }
+                } else {
+                    // If we cannot form a valid run, break out.
+                    break;
+                }
+            }
+            // Any remaining cards for this color that did not form a run go to leftovers.
+            leftovers.push(...sorted);
+        }
+
+        return { sets: validRuns, otherCards: leftovers };
+    }
+
+
+    getUserCardsIdsOrderdByValue(): UserCardsOrdered {
+        const allUserCards = this.userCards.filter(isDefined);
+        // First extract valid number groups.
+        const { sets: numberGoupSets, otherCards: notFormNumberGroup } = this.extractNumberGroups(allUserCards);
+
+        // Next extract runs from the leftover cards.
+        const { sets: runsSets, otherCards: cardsThatAreNotSets } = this.extractRuns(notFormNumberGroup);
+
+        return orderUserCardsBySameComparator(
+            {
+                sets: [...numberGoupSets, ...runsSets],
+                otherCards: cardsThatAreNotSets
+            },
+            cardByTypeComperator
+                .then(cardByValueComparator)
+                .then(cardByColorComparator)
+        );
+    }
 
     getMinimalVisibleBoard(currentlyDraggedCard: RealCardData | null): Board {
         return {

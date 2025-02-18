@@ -9,6 +9,7 @@
 	import FinishTurnButton from './FinishTurnButton.svelte';
 	import DrawCardButton from './DrawCardButton.svelte';
 	import PlayersPanel from '$lib/components/PlayersPanel.svelte';
+	import { isDefined } from '$lib/utils/utils';
 
 	const dragDropContext = $state({ draggedCard: null, draggedFrom: null });
 	setCardDragDropContext(dragDropContext);
@@ -26,7 +27,7 @@
 		const hasUserMadeContributions = hasUserMadeContributionsToTheTable(
 			{
 				board: gameContext.gameManager.board,
-				playerCardIds: gameContext.gameManager.userCards.map((p) => p.id)
+				playerCardIds: gameContext.gameManager.userCards.filter(isDefined).map((p) => p.id)
 			},
 			gameContext.gameManager.beforePlayerChangesData
 		);
@@ -83,8 +84,6 @@
 		align-items: stretch;
 		gap: 10px;
 		margin: 10px;
-
-		width: 150px;
 	}
 
 	.bottom-part {

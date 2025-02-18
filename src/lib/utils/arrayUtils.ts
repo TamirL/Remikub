@@ -42,3 +42,35 @@ function shuffledArray<T>(array: T[]): void {
         [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
     }
 }
+
+export function splitArrayByNulls<T>(arr: readonly (T | null)[]): T[][] {
+    const result: T[][] = [];
+    let current: T[] = [];
+    for (const item of arr) {
+        if (item === null) {
+            if (current.length > 0) {
+                result.push(current);
+                current = [];
+            }
+        } else {
+            current.push(item);
+        }
+    }
+    // Push any remaining elements in the current block.
+    if (current.length > 0) {
+        result.push(current);
+    }
+    return result;
+}
+
+export function joinArrayWithNull<T>(blocks: T[][]): (T | null)[] {
+    const result: (T | null)[] = [];
+    blocks.forEach((block, index) => {
+        result.push(...block);
+        // Add null separator if this isn't the last block.
+        if (index !== blocks.length - 1) {
+            result.push(null);
+        }
+    });
+    return result;
+}

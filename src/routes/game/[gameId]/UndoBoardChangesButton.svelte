@@ -10,17 +10,13 @@
 		hasUserMadeContributionsToTheBoard(
 			{
 				board: gameContext.gameManager.board,
-				playerCardIds: gameContext.gameManager.userCards.map((p) => p.id)
+				playerCardIds: gameContext.gameManager.userCards.map((p) => p?.id ?? null)
 			},
 			gameContext.gameManager.beforePlayerChangesData
 		)
 	);
 
 	const enableButton = $derived(isItMyTurn && hasUserChangedBoard);
-
-	$effect(() => {
-		console.log('enableButton', enableButton, { isItMyTurn, hasUserChangedBoard });
-	});
 </script>
 
 <form action={`?/undo-board-changes`} method="POST">

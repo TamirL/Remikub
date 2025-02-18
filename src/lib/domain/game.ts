@@ -2,10 +2,11 @@ import { getContext, setContext } from "svelte";
 import GameManager from "./managers/gameManager.svelte";
 import type { User } from "./user";
 import type { Board, CardNumberGroup, CardRun } from "./board";
+import type { UserCardId } from "./userCards";
 
 export type RelevantCardsForPlayerTurn = {
     board: Board;
-    playerCardIds: number[];
+    playerCardIds: UserCardId[];
 }
 
 export type GameFromPlayerPerspective = {
@@ -15,7 +16,7 @@ export type GameFromPlayerPerspective = {
     isItMyTurn: boolean;
     board: Board;
     deckSize: number;
-    userCardsIds: number[];
+    userCardsIds: UserCardId[];
     beforePlayerChangesData: RelevantCardsForPlayerTurn | null;
 }
 

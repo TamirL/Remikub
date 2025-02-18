@@ -5,6 +5,7 @@ import type { RequestHandler } from "@sveltejs/kit";
 import { broadcastGameUpdate } from "../updates/gameUpdatePusher";
 import type { ReorderUserCardsAction } from "$lib/domain/gameActions";
 import { updatePlayersData } from "$lib/server/domain/players";
+import type { UserCardId } from "$lib/domain/userCards";
 
 export const POST: RequestHandler = async ({ request, params, cookies }) => {
     const userId = cookies.get('userId');
@@ -41,7 +42,7 @@ export const POST: RequestHandler = async ({ request, params, cookies }) => {
     return new Response();
 }
 
-function performUserCardsReorder(game: Game, userId: string, newCardIdsOrder: number[]): Game {
+function performUserCardsReorder(game: Game, userId: string, newCardIdsOrder: UserCardId[]): Game {
     return ({
         id: game.id,
         hasStarted: game.hasStarted,
@@ -54,8 +55,7 @@ function performUserCardsReorder(game: Game, userId: string, newCardIdsOrder: nu
     })
 }
 
-function reorderUserCards(players: Map<string, PlayerInGame>, userId: string, newCardIdsOrder: number[]): Map<string, PlayerInGame> {
-
+function reorderUserCards(players: Map<string, PlayerInGame>, userId: string, newCardIdsOrder: UserCardId[]): Map<string, PlayerInGame> {
     return updatePlayersData(players, userId, (player) => {
         return {
             userId: player.userId,

@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { page } from '$app/state';
 	import Button from '$lib/components/Button.svelte';
 	import { hasUserMadeContributionsToTheTable } from '$lib/domain/board';
 	import { getGameContext } from '$lib/domain/game';
+	import { isDefined } from '$lib/utils/utils';
 
 	const gameContext = getGameContext();
 
@@ -10,7 +10,7 @@
 		hasUserMadeContributionsToTheTable(
 			{
 				board: gameContext.gameManager.board,
-				playerCardIds: gameContext.gameManager.userCards.map((p) => p.id)
+				playerCardIds: gameContext.gameManager.userCards.filter(isDefined).map((p) => p.id)
 			},
 			gameContext.gameManager.beforePlayerChangesData
 		)
@@ -23,7 +23,5 @@
 </script>
 
 <form action={`?/finish-turn`} method="POST">
-	<Button type="submit" disabled={!enableButton}>
-		Finish Turn
-	</Button>
+	<Button type="submit" disabled={!enableButton}>Finish Turn</Button>
 </form>

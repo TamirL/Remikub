@@ -2,13 +2,16 @@
 	import { getGameContext } from '$lib/domain/game';
 	import Button from '$lib/components/Button.svelte';
 	import type { ReorderUserCardsAction } from '$lib/domain/gameActions';
+	import { joinArrayWithNull } from '$lib/utils/arrayUtils';
 
 	const gameContext = getGameContext();
 
 	async function orderByNumber() {
 		const newOrder = gameContext.gameManager.getUserCardsIdsOrderdByValue();
 		const requestBody: ReorderUserCardsAction = {
-			cardIdsNewOrder: newOrder
+			cardIdsNewOrder: joinArrayWithNull([...newOrder.sets, newOrder.otherCards]).map(
+				(card) => card?.id ?? null
+			)
 		};
 
 		await fetch(`/api/game/${gameContext.gameManager.gameId}/user-cards`, {
