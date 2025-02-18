@@ -113,11 +113,9 @@ class GameManager {
     getUserCardsIdsOrderdByColor() {
         const allUserCards = this.userCards.filter(isDefined);
 
-        // Next extract number groups from the leftover cards.
-        const { sets: runsSets, otherCards: cardsThatAreNotNumberGroups } = this.extractRuns(allUserCards);
+        const { sets: runsSets, otherCards: cardsThatAreNotRuns } = this.extractRuns(allUserCards);
 
-        // First extract valid runs.
-        const { sets: numberGoupSets, otherCards: cardsThatAreNotSets } = this.extractNumberGroups(cardsThatAreNotNumberGroups);
+        const { sets: numberGoupSets, otherCards: cardsThatAreNotSets } = this.extractNumberGroups(cardsThatAreNotRuns);
 
         return orderUserCardsBySameComparator(
             {
@@ -238,15 +236,13 @@ class GameManager {
                 if (run.length >= 3) {
                     // A valid run is formed. Save it.
                     validRuns.push(run);
-                    // Remove the used cards from the sorted array.
-                    // Remove in descending order to avoid index shift.
-                    indicesToRemove.sort((a, b) => b - a);
-                    for (const index of indicesToRemove) {
-                        sorted.splice(index, 1);
-                    }
-                } else {
-                    // If we cannot form a valid run, break out.
-                    break;
+                }
+
+                // Remove the used cards from the sorted array.
+                // Remove in descending order to avoid index shift.
+                indicesToRemove.sort((a, b) => b - a);
+                for (const index of indicesToRemove) {
+                    sorted.splice(index, 1);
                 }
             }
             // Any remaining cards for this color that did not form a run go to leftovers.
