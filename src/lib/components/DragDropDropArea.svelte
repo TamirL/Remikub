@@ -4,18 +4,22 @@
 	const {
 		disableDragDrop,
 		isAnyElementDragged,
+		onElementDragOverChange,
 		onElementDropped,
 		content
 	}: {
 		disableDragDrop?: boolean;
 		isAnyElementDragged: boolean;
+		onElementDragOverChange?(isOver: boolean): void;
 		onElementDropped(): void;
-		content: Snippet<[isDragOver: boolean]>;
+		content?: Snippet<[isDragOver: boolean]>;
 	} = $props();
 
 	let isOtherElementDraggedOverThis = $state(false);
 
-	$inspect(isOtherElementDraggedOverThis);
+	$effect(() => {
+		onElementDragOverChange?.(isOtherElementDraggedOverThis);
+	});
 
 	function handleDragEnter(event: DragEvent) {
 		if (disableDragDrop) {
@@ -54,7 +58,9 @@
 	}}
 >
 	<div class={isAnyElementDragged ? 'is-any-card-dragged' : ''}>
-		{@render content(isOtherElementDraggedOverThis)}
+		{#if content}
+			{@render content(isOtherElementDraggedOverThis)}
+		{/if}
 	</div>
 </div>
 

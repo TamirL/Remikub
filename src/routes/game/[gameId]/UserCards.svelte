@@ -48,7 +48,7 @@
 	<div class="user-cards">
 		{#each cardsAndDropTargets as card, index}
 			{#if card === null}
-				<CardDropTarget {index} {height} {width} dropTargetWidth={width} />
+				<CardDropTarget {index} {height} {width} dropTargetWidth="{itemWidth + 6}px" />
 			{:else}
 				<DragabbleCard cardData={card} draggedFrom={null} />
 			{/if}
@@ -73,8 +73,9 @@
 		display: flex;
 		flex-direction: row;
 		align-items: flex-start;
+		align-content: flex-start;
 		flex-wrap: wrap;
-		gap: 10px 5px;
+		gap: 10px 6px;
 
 		background-color: brown;
 		padding: 20px;

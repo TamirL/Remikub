@@ -16,6 +16,12 @@
 	const dragDropContext = getCardDragDropContext();
 	const gameContext = getGameContext();
 
+	let isCardOverThis = $state(false);
+
+	function onElementDragOverChange(isOver: boolean) {
+		isCardOverThis = isOver;
+	}
+
 	async function onElementDropped() {
 		const userCards = gameContext.gameManager.userCards;
 
@@ -43,13 +49,16 @@
 	}
 </script>
 
-<div class="visible-box" style="--visible-box-width: {width}; --visible-box-height: {height}">
+<div
+	class={['visible-box', isCardOverThis && 'card-over-me']}
+	style="--visible-box-width: {width}; --visible-box-height: {height}"
+>
 	<div class="drop-target" style="--drop-target-width: {dropTargetWidth}">
-		<DragDropDropArea isAnyElementDragged={!!dragDropContext.draggedCard} {onElementDropped}>
-			{#snippet content(isCardOverThis: boolean)}
-				<div class={['highlight-drop-target', isCardOverThis && 'card-over-me']}></div>
-			{/snippet}
-		</DragDropDropArea>
+		<DragDropDropArea
+			isAnyElementDragged={!!dragDropContext.draggedCard}
+			{onElementDropped}
+			{onElementDragOverChange}
+		/>
 	</div>
 </div>
 
@@ -58,6 +67,7 @@
 		position: relative;
 		width: var(--visible-box-width);
 		height: var(--visible-box-height);
+		border-radius: 4px;
 	}
 
 	.drop-target {
@@ -65,18 +75,10 @@
 		top: 0;
 		bottom: 0;
 		left: calc((var(--drop-target-width) - var(--visible-box-width)) * -0.5);
-		right: calc((var(--drop-target-width) - var(--visible-box-width)) * 0.5);
-	}
-
-	.highlight-drop-target {
-		position: absolute;
-		inset: 0;
+		right: calc((var(--drop-target-width) - var(--visible-box-width)) * -0.5);
 	}
 
 	.card-over-me {
 		background-color: #00000042;
-		border-radius: 4px;
-		width: var(--drop-target-width);
-		height: var(--visible-box-height);
 	}
 </style>
