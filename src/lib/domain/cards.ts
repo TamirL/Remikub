@@ -67,6 +67,8 @@ function getJokerCardColorForCss(color: JokerCardColor) {
 type CardSize = {
     width: string;
     height: string;
+    widthPx: number;
+    heightPx: number;
 }
 
 export function setCardSizeContext(size: CardSize) {

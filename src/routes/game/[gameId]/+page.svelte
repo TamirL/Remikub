@@ -8,9 +8,12 @@
 	import { source, type Source } from 'sveltekit-sse';
 
 	const widthInPixels = 40;
+	const heightInPixels = widthInPixels * 1.41;
 	setCardSizeContext({
+		widthPx: widthInPixels,
 		width: `${widthInPixels}px`,
-		height: `${widthInPixels * 1.41}px`
+		heightPx: heightInPixels,
+		height: `${heightInPixels}px`
 	});
 
 	const { data }: { data: GameFromPlayerPerspective } = $props();

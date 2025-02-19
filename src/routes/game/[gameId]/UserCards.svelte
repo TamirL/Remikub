@@ -6,15 +6,47 @@
 	import OrderByNumberButton from './OrderByNumberButton.svelte';
 	import CardDropTarget from '$lib/components/CardDropTarget.svelte';
 	import { getCardSizeContext } from '$lib/domain/cards';
+	import { resizeObserver } from '$lib/actions/resizeObserver.svelte';
 
 	const { cards }: { cards: readonly UserCard[] } = $props();
 
-	const { width, height } = getCardSizeContext();
+	const { width, widthPx: itemWidth, height, heightPx: itemHeight } = getCardSizeContext();
+
+	let containerWidth = $state(0);
+	let containerHeight = $state(0);
+
+	function handleResize(event: CustomEvent<{ width: number; height: number }>) {
+		containerWidth = event.detail.width;
+		containerHeight = event.detail.height;
+	}
+
+	const totalItems = $derived.by(() => {
+		const paddingLeft = 10,
+			paddingRight = 10;
+		const paddingTop = 10,
+			paddingBottom = 10;
+
+		const gap = 10; // gap between items
+
+		// Calculate effective dimensions
+		const effectiveWidth = containerWidth - (paddingLeft + paddingRight);
+		const effectiveHeight = containerHeight - (paddingTop + paddingBottom);
+
+		// Calculate how many items fit per row and per column
+		const itemsPerRow = Math.floor((effectiveWidth + gap) / (itemWidth + gap));
+		const rows = Math.floor((effectiveHeight + gap) / (itemHeight + gap));
+		return itemsPerRow * rows;
+	});
+
+	const cardsAndDropTargets: UserCard[] = $derived([
+		...cards,
+		...Array(Math.max(totalItems - cards.length, 0)).fill(null)
+	]);
 </script>
 
-<div class="user-cards-container">
+<div class="user-cards-container" use:resizeObserver onresize={handleResize}>
 	<div class="user-cards">
-		{#each cards as card, index (card?.id)}
+		{#each cardsAndDropTargets as card, index}
 			{#if card === null}
 				<CardDropTarget {index} {height} {width} dropTargetWidth={width} />
 			{:else}
