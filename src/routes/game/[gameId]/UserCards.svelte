@@ -1,23 +1,25 @@
 <script lang="ts">
-	import { splitArrayByNulls } from '$lib/utils/arrayUtils';
 	import type { UserCard } from '$lib/domain/userCards';
 	import DragabbleCard from '$lib/components/DragabbleCard.svelte';
 	import OrderByColorButton from './OrderByColorButton.svelte';
 	import OrderByColorAndSequentialButton from './OrderByValueAndSequentialButton.svelte';
 	import OrderByNumberButton from './OrderByNumberButton.svelte';
+	import CardDropTarget from '$lib/components/CardDropTarget.svelte';
+	import { getCardSizeContext } from '$lib/domain/cards';
 
 	const { cards }: { cards: readonly UserCard[] } = $props();
-	const cardsBlocks = $derived(splitArrayByNulls(cards));
+
+	const { width, height } = getCardSizeContext();
 </script>
 
 <div class="user-cards-container">
 	<div class="user-cards">
-		{#each cardsBlocks as cardBlock}
-			<div class="card-block">
-				{#each cardBlock as card (card.id)}
-					<DragabbleCard cardData={card} draggedFrom={null} />
-				{/each}
-			</div>
+		{#each cards as card, index (card?.id)}
+			{#if card === null}
+				<CardDropTarget {index} {height} {width} dropTargetWidth={width} />
+			{:else}
+				<DragabbleCard cardData={card} draggedFrom={null} />
+			{/if}
 		{/each}
 	</div>
 	<div class="user-cards-order-buttons">
@@ -46,15 +48,6 @@
 		padding: 20px;
 
 		flex: 1;
-	}
-
-	.card-block {
-		display: flex;
-		flex-direction: row;
-		align-items: flex-start;
-		flex-wrap: wrap;
-		gap: 10px 5px;
-		padding-inline-end: 20px;
 	}
 
 	.user-cards-order-buttons {

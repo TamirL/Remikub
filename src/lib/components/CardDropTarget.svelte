@@ -1,15 +1,63 @@
 <script lang="ts">
-	const { dropTargetWidth, width }: { dropTargetWidth: string; width: string } = $props();
+	import { getCardDragDropContext } from '$lib/domain/cards';
+	import { getGameContext } from '$lib/domain/game';
+	import type { ReorderUserCardsAction } from '$lib/domain/gameActions';
+	import { joinArrayWithNull } from '$lib/utils/arrayUtils';
+	import DragDropDropArea from './DragDropDropArea.svelte';
+	import { type UserCardsOrdered } from '$lib/domain/userCards';
+
+	const {
+		index,
+		dropTargetWidth,
+		width,
+		height
+	}: { index: number; dropTargetWidth: string; width: string; height: string } = $props();
+
+	const dragDropContext = getCardDragDropContext();
+	const gameContext = getGameContext();
+
+	async function onElementDropped() {
+		const userCards = gameContext.gameManager.userCards;
+
+		const userCardsUpdated = [...userCards];
+		const indexOfDraggedCard = userCardsUpdated.findIndex(
+			(userCard) => userCard?.id === dragDropContext.draggedCard?.id
+		);
+
+		[userCardsUpdated[index], userCardsUpdated[indexOfDraggedCard]] = [
+			userCardsUpdated[indexOfDraggedCard],
+			userCardsUpdated[index]
+		];
+
+		const requestBody: ReorderUserCardsAction = {
+			cardIdsNewOrder: userCardsUpdated.map((card) => card?.id ?? null)
+		};
+
+		await fetch(`/api/game/${gameContext.gameManager.gameId}/user-cards`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(requestBody)
+		});
+	}
 </script>
 
-<div class="visible-box" style="--visible-box-width: {width}">
-	<div class="drop-target" style="--drop-target-width: {dropTargetWidth}"></div>
+<div class="visible-box" style="--visible-box-width: {width}; --visible-box-height: {height}">
+	<div class="drop-target" style="--drop-target-width: {dropTargetWidth}">
+		<DragDropDropArea isAnyElementDragged={!!dragDropContext.draggedCard} {onElementDropped}>
+			{#snippet content(isCardOverThis: boolean)}
+				<div class={['highlight-drop-target', isCardOverThis && 'card-over-me']}></div>
+			{/snippet}
+		</DragDropDropArea>
+	</div>
 </div>
 
 <style>
 	.visible-box {
 		position: relative;
 		width: var(--visible-box-width);
+		height: var(--visible-box-height);
 	}
 
 	.drop-target {
@@ -18,5 +66,17 @@
 		bottom: 0;
 		left: calc((var(--drop-target-width) - var(--visible-box-width)) * -0.5);
 		right: calc((var(--drop-target-width) - var(--visible-box-width)) * 0.5);
+	}
+
+	.highlight-drop-target {
+		position: absolute;
+		inset: 0;
+	}
+
+	.card-over-me {
+		background-color: #00000042;
+		border-radius: 4px;
+		width: var(--drop-target-width);
+		height: var(--visible-box-height);
 	}
 </style>

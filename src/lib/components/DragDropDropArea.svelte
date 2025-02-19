@@ -3,12 +3,12 @@
 
 	const {
 		disableDragDrop,
-        isAnyElementDragged,
+		isAnyElementDragged,
 		onElementDropped,
 		content
 	}: {
 		disableDragDrop?: boolean;
-        isAnyElementDragged: boolean;
+		isAnyElementDragged: boolean;
 		onElementDropped(): void;
 		content: Snippet<[isDragOver: boolean]>;
 	} = $props();
@@ -44,6 +44,7 @@
 <div
 	role="region"
 	aria-label="Drop zone for card"
+	class="drag-zone"
 	ondragenter={handleDragEnter}
 	ondrop={handleDrop}
 	ondragleave={handleDragLeave}
@@ -58,6 +59,11 @@
 </div>
 
 <style>
+	.drag-zone {
+		width: 100%;
+		height: 100%;
+	}
+
 	/* When any card is being dragged, we disable pointer events on all cards to prevent
 	   the dragenter/dragleave events from firing on the cards themselves instead of their containers.
 	   This ensures drag & drop works reliably when hovering over existing cards. */
