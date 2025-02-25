@@ -3,20 +3,23 @@
 	import { goto } from '$app/navigation';
 	import Button from '$lib/components/Button.svelte';
 	import { loggedInUser } from '$lib/stores/user.svelte';
-	import type { PageProps } from './$types';
+	import type { SubmitFunction } from './$types';
 
-	let { data, form }: PageProps = $props();
+	const submitFunction: SubmitFunction = () => {
+		return async ({ result, update }) => {
+			if (result.type !== 'success' || !result.data) {
+				update();
+				return;
+			}
 
-	$effect(() => {
-		if (form?.user) {
-			loggedInUser.user = form.user;
-			goto(form.redirectUrl ?? '/');
-		}
-	});
+			loggedInUser.user = result.data.user ?? null;
+			goto(result.data.redirectUrl ?? '/');
+		};
+	};
 </script>
 
 <div class="page-size-wrapper">
-	<form method="POST" use:enhance>
+	<form method="POST" use:enhance={submitFunction}>
 		<label for="name">Name</label>
 		<input name="name" />
 		<Button type="submit">Log in</Button>

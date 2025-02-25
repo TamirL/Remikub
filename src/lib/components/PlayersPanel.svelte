@@ -1,12 +1,9 @@
 <script lang="ts">
-	import { getGameContext } from '$lib/domain/game';
 	import type { User } from '$lib/domain/user';
 	import PlayerCard from './PlayerCard.svelte';
 
 	const { players, currentTurnUserId }: { players: User[]; currentTurnUserId: string | null } =
 		$props();
-
-	const gameContext = getGameContext();
 </script>
 
 <div class="players-panel">
