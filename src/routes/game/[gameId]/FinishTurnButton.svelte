@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { enhance } from '$app/forms';
 	import Button from '$lib/components/Button.svelte';
 	import { hasUserMadeContributionsToTheTable } from '$lib/domain/board';
 	import { getGameContext } from '$lib/domain/game';
@@ -22,6 +23,6 @@
 	const enableButton = $derived(isItMyTurn && hasPlayerMadeContributions && isBoardValid);
 </script>
 
-<form action={`?/finish-turn`} method="POST">
+<form action={`?/finish-turn`} method="POST" use:enhance>
 	<Button type="submit" disabled={!enableButton}>Finish Turn</Button>
 </form>

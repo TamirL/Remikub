@@ -1,7 +1,7 @@
 import type { Action } from 'svelte/action';
 
 interface Attributes {
-    'onresize': (event: CustomEvent<{ width: number, height: number; }>) => void;
+    'onelementresize': (event: CustomEvent<{ width: number, height: number; }>) => void;
 }
 
 export const resizeObserver: Action<HTMLElement, undefined, Attributes> = (node: HTMLElement) => {

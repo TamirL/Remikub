@@ -7,8 +7,8 @@ export async function getUser(userId: string): Promise<User | null> {
     return user ?? null;
 }
 
-export async function createOrUpdateUser(userId: string | null, name: string): Promise<User> {
-    const id = userId ?? createUserUniqueId();
+export async function createOrUpdateUser(userId: string, name: string): Promise<User> {
+    const id = userId;
     let user = users.get(id);
 
     if (user) {
@@ -20,8 +20,3 @@ export async function createOrUpdateUser(userId: string | null, name: string): P
 
     return user;
 }
-
-export function createUserUniqueId(): string {
-    return crypto.randomUUID();
-}
-

@@ -5,6 +5,7 @@
 	import { source } from 'sveltekit-sse';
 	import { goto } from '$app/navigation';
 	import PlayersPanel from '$lib/components/PlayersPanel.svelte';
+	import { enhance } from '$app/forms';
 
 	const { data }: { data: GameLobbyFromUserPerspective } = $props();
 	const updateManager = new UpdateManager(data, source(`/api/game/${data.id}/lobby/updates`));
@@ -22,11 +23,11 @@
 			Game {data.id}
 		</h1>
 		{#if !updateManager.mostRecentData.amIParticipating}
-			<form action="?/join-game" method="POST">
+			<form action="?/join-game" method="POST" use:enhance>
 				<Button>Join</Button>
 			</form>
 		{:else if updateManager.mostRecentData.players.length >= 2}
-			<form action="?/start-game" method="POST">
+			<form action="?/start-game" method="POST" use:enhance>
 				<Button>Start Game!</Button>
 			</form>
 		{/if}

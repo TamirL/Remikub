@@ -1,7 +1,7 @@
 import { calcIsBoardValid, type GameFromPlayerPerspective } from '$lib/domain/game';
-import { getGameFromUserPerspective, type Game, type PlayerInGame } from '$lib/server/domain/game';
-import { getGame, storeGame } from '$lib/server/storage/game';
-import { error, redirect } from '@sveltejs/kit';
+import { getGameFromUserPerspective, type Game } from '$lib/server/domain/game';
+import { storeGame } from '$lib/server/storage/game';
+import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { broadcastGameUpdate } from '../../api/game/[gameId]/updates/gameUpdatePusher';
 import { hasUserMadeContributionsToTheTable } from '$lib/domain/board';
@@ -9,44 +9,26 @@ import { updatePlayersData } from '$lib/server/domain/players';
 import { isDefined } from '$lib/utils/utils';
 import { isSetsEqual } from '$lib/utils/setUtils';
 import type { UserCardId } from '$lib/domain/userCards';
+import { assertItIsPlayersTurn, assertUserExist, assertValidGameState } from '$lib/server/assertions';
 
 export const load: PageServerLoad = async ({ params, cookies }): Promise<GameFromPlayerPerspective> => {
     const userId = cookies.get('userId');
+    const user = await assertUserExist(userId);
 
-    if (!userId) {
-        throw error(401, 'Unauthorized');
-    }
+    const game = await assertValidGameState(user.id, params.gameId);
 
-    const { gameId } = params;
-
-    if (typeof gameId !== 'string' && !gameId) {
-        throw error(400, 'Bad request');
-    }
-
-    const game = await getGame(gameId);
-
-    if (!game) {
-        throw error(404, 'Game not found');
-    }
-
-    if (!game.hasStarted) {
-        redirect(303, `/game/${gameId}/lobby`);
-    }
-
-    const player = game.players.get(userId);
-
-    if (!player) {
-        throw error(403, 'Forbidden');
-    }
-
-    return getGameFromUserPerspective(game, userId);
+    return getGameFromUserPerspective(game, user.id);
 }
 
 export const actions = {
     'finish-turn': async ({ params, cookies }) => {
         const userId = cookies.get('userId');
+        const user = await assertUserExist(userId);
+
         const { gameId } = params;
-        const { game, currentPlayer } = await assertValidUserAndGameState(userId, gameId);
+
+        const game = await assertValidGameState(user.id, gameId);
+        const currentPlayer = await assertItIsPlayersTurn(user.id, game);
 
         const isGameValid = calcIsBoardValid(game.board);
 
@@ -66,8 +48,12 @@ export const actions = {
     },
     'undo-board-changes': async ({ params, cookies }) => {
         const userId = cookies.get('userId');
+        const user = await assertUserExist(userId);
+
         const { gameId } = params;
-        const { game } = await assertValidUserAndGameState(userId, gameId);
+
+        const game = await assertValidGameState(user.id, gameId);
+        await assertItIsPlayersTurn(user.id, game);
 
         const updatedGame = undoBoardChanges(game);
 
@@ -77,8 +63,12 @@ export const actions = {
     },
     'draw-card': async ({ params, cookies }) => {
         const userId = cookies.get('userId');
+        const user = await assertUserExist(userId);
+
         const { gameId } = params;
-        const { game } = await assertValidUserAndGameState(userId, gameId);
+
+        const game = await assertValidGameState(user.id, gameId);
+        await assertItIsPlayersTurn(user.id, game);
 
         let updatedGame = undoBoardChanges(game);
         updatedGame = drawCard(updatedGame);
@@ -89,37 +79,6 @@ export const actions = {
     }
 }
 
-async function assertValidUserAndGameState(userId: string | undefined, gameId: string | undefined): Promise<{ game: Game; currentPlayer: PlayerInGame; }> {
-    if (!userId) {
-        throw error(401, 'Unauthorized');
-    }
-
-    if (!gameId) {
-        throw error(400, 'gameId not in address');
-    }
-
-    const game = await getGame(gameId);
-
-    if (!game) {
-        throw error(404, 'Game not found');
-    }
-
-    const currentPlayer = game.players.get(userId);
-
-    if (!currentPlayer) {
-        throw error(403, 'Forbidden');
-    }
-
-    if (game.currentTurnPlayerId !== userId) {
-        throw error(400, 'Not your turn');
-    }
-
-    if (!game.hasStarted) {
-        throw error(400, 'Game has not started');
-    }
-
-    return { game, currentPlayer };
-}
 
 function moveToTheNextPerson(game: Game): Game {
     const playersArray = Array.from(game.players.values());

@@ -41,23 +41,25 @@
 <div class="game">
 	<div class="top-part">
 		<Board />
-		<div class="players-side-panel">
-			<PlayersPanel
-				players={gameContext.gameManager.players}
-				currentTurnUserId={gameContext.gameManager.currentTurnUserId}
-			/>
+		<div class="side-panel">
+			<div class="players-panel">
+				<PlayersPanel
+					players={gameContext.gameManager.players}
+					currentTurnUserId={gameContext.gameManager.currentTurnUserId}
+				/>
+			</div>
+			<div class="user-actions">
+				<UndoBoardChangesButton />
+				{#if isItMyTurn && canFinishTurn}
+					<FinishTurnButton />
+				{:else}
+					<DrawCardButton />
+				{/if}
+			</div>
 		</div>
 	</div>
 	<div class="bottom-part">
 		<UserCards cards={gameContext.gameManager.userCards} />
-		<div class="user-actions">
-			<UndoBoardChangesButton />
-			{#if isItMyTurn && canFinishTurn}
-				<FinishTurnButton />
-			{:else}
-				<DrawCardButton />
-			{/if}
-		</div>
 	</div>
 </div>
 
@@ -78,12 +80,16 @@
 		flex: 1;
 	}
 
-	.players-side-panel {
+	.side-panel {
 		display: flex;
 		flex-direction: column;
 		align-items: stretch;
 		gap: 10px;
 		margin: 10px;
+	}
+
+	.players-panel {
+		flex: 1;
 	}
 
 	.bottom-part {

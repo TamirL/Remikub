@@ -6,87 +6,35 @@ import { getUser } from "$lib/server/storage/users.js";
 import { broadcastGameLobbyUpdate } from "../../../api/game/[gameId]/lobby/updates/lobbyUpdatePusher.js";
 import { getRandomElement } from "$lib/utils/arrayUtils.js";
 import { isDefined } from "$lib/utils/utils.js";
+import { assertUserExist, assertValidGameState } from "$lib/server/assertions.js";
+import { USER_ID_COOKIE_FIELD } from "$lib/domain/user.js";
 
 export async function load({ params, cookies }): Promise<GameLobbyFromUserPerspective> {
-    const userId = cookies.get('userId');
-    if (!userId) {
-        throw error(401, 'Unauthorized');
-    }
+    const user = await assertUserExist(cookies.get(USER_ID_COOKIE_FIELD));
+
     const { gameId } = params;
-    if (typeof gameId !== 'string' && !gameId) {
-        throw error(400, 'Bad request');
-    }
-    const game = await getGame(gameId);
-    if (!game) {
-        throw error(404, 'Game not found');
-    }
+    const game = await assertValidGameState(user.id, gameId, { hasGameStarted: false, isUserPartOfTheGame: null });
 
-    if (game.hasStarted) {
-        redirect(303, `/game/${gameId}`);
-    }
-
-    return getGameLobbyFromUserPerspective(game, userId);
+    return getGameLobbyFromUserPerspective(game, user.id);
 }
 
 export const actions = {
     'join-game': async ({ params, cookies }) => {
+        const user = await assertUserExist(cookies.get(USER_ID_COOKIE_FIELD));
+
         const { gameId } = params;
+        const game = await assertValidGameState(user.id, gameId, { hasGameStarted: false, isUserPartOfTheGame: false });
 
-        if (!gameId) {
-            throw error(400, 'gameId not in address');
-        }
-
-        const userId = cookies.get('userId');
-        if (!userId) {
-            throw error(401, 'Unauthorized');
-        }
-
-        const user = await getUser(userId);
-
-        if (!user) {
-            throw error(401, 'Unauthorized');
-        }
-
-        const game = await getGame(gameId);
-        if (!game) {
-            throw error(404, 'Game not found');
-        }
-
-        if (game.hasStarted) {
-            throw error(403, 'Game has already started');
-        }
-
-        const updatedGame = addPlayerToGame(game, userId);
+        const updatedGame = addPlayerToGame(game, user.id);
 
         storeGame(updatedGame);
         broadcastGameLobbyUpdate('player-joined', updatedGame);
     },
     'start-game': async ({ params, cookies }) => {
+        const user = await assertUserExist(cookies.get(USER_ID_COOKIE_FIELD));
+
         const { gameId } = params;
-
-        if (!gameId) {
-            throw error(400, 'gameId not in address');
-        }
-
-        const userId = cookies.get('userId');
-        if (!userId) {
-            throw error(401, 'Unauthorized');
-        }
-
-        const user = await getUser(userId);
-
-        if (!user) {
-            throw error(401, 'Unauthorized');
-        }
-
-        const game = await getGame(gameId);
-        if (!game) {
-            throw error(404, 'Game not found');
-        }
-
-        if (game.hasStarted) {
-            throw error(400, 'Game has already started');
-        }
+        const game = await assertValidGameState(user.id, gameId, { hasGameStarted: false, isUserPartOfTheGame: true });
 
         if (game.players.size < 2) {
             throw error(400, 'Not enough players');

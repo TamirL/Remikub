@@ -44,7 +44,7 @@
 	]);
 </script>
 
-<div class="user-cards-container" use:resizeObserver onresize={handleResize}>
+<div class="user-cards-container" use:resizeObserver onelementresize={handleResize}>
 	<div class="user-cards">
 		{#each cardsAndDropTargets as card, index}
 			{#if card === null}

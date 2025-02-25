@@ -1,7 +1,31 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import '../app.css';
-	import Header from './Header.svelte';
-	let { children } = $props();
+	import { loggedInUser } from '$lib/stores/user.svelte';
+	import { goto } from '$app/navigation';
+	import type { LayoutData } from './$types';
+
+	const { children, data }: { children: Snippet; data: LayoutData } = $props();
+
+	loggedInUser.user = data.loggedInUser;
+	if (!data.isLogin && !data.loggedInUser) {
+		goto('/login');
+	}
+
+	$effect(() => {
+		const abort = new AbortController();
+		document.addEventListener(
+			'touchmove',
+			(e) => {
+				e.preventDefault();
+			},
+			{ signal: abort.signal, passive: false }
+		);
+
+		return () => {
+			abort.abort();
+		};
+	});
 </script>
 
 <div class="main">

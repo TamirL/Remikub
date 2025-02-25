@@ -1,11 +1,12 @@
 <script lang="ts">
 	import type { User } from '$lib/domain/user';
+	import { loggedInUser } from '$lib/stores/user.svelte';
 
 	const { player, isItTheirTurn }: { player: User; isItTheirTurn?: boolean } = $props();
 </script>
 
 <span class={['player-card', isItTheirTurn && 'their-turn']}>
-	<span class="name">{player.name}</span>
+	<span class="name">{player.name} {loggedInUser.user?.id === player.id ? ' - You' : ''}</span>
 </span>
 
 <style>
@@ -22,7 +23,7 @@
 		}
 
 		&.their-turn {
-            outline: 2px solid #e5ff00;
+			outline: 2px solid #e5ff00;
 		}
 	}
 </style>
