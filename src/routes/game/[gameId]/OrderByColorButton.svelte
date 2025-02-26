@@ -6,7 +6,7 @@
 
 	const gameContext = getGameContext();
 
-	async function orderByColor() {
+	async function performReorder() {
 		const newOrder = gameContext.gameManager.getUserCardsIdsOrderdByColor();
 		const requestBody: ReorderUserCardsAction = {
 			cardIdsNewOrder: joinArrayWithNull([...newOrder.sets, newOrder.otherCards]).map(
@@ -24,11 +24,10 @@
 	}
 </script>
 
-<Button onclick={orderByColor}
-	><span class="black-cards">1</span><span class="yellow-cards">2</span><span class="black-cards"
-		>2</span
-	><span class="yellow-cards">3</span></Button
->
+<Button onclick={performReorder}>
+	<span class="black-cards">19</span>
+	<span class="yellow-cards">25</span>
+</Button>
 
 <style>
 	.black-cards {

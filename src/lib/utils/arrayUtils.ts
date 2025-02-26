@@ -11,12 +11,18 @@ export function groupBy<T, K extends keyof any>(array: T[], key: (item: T) => K)
     }, {} as Record<K, T[]>);
 }
 
-export function groupByToMap<T, K>(array: T[], key: (item: T) => K): Map<K, T[]> {
+export function groupByToMap<T, K>(array: T[], key: (item: T) => K, withoutNull = true): Map<K, T[]> {
     return array.reduce((result, item) => {
         const groupKey = key(item);
+
+        if (withoutNull && groupBy === null) {
+            return result;
+        }
+
         if (!result.has(groupKey)) {
             result.set(groupKey, []);
         }
+
         result.get(groupKey)!.push(item);
         return result;
     }, new Map<K, T[]>());

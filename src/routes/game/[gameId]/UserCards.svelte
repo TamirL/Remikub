@@ -2,10 +2,10 @@
 	import type { UserCard } from '$lib/domain/userCards';
 	import DragabbleCard from '$lib/components/DragabbleCard.svelte';
 	import OrderByColorButton from './OrderByColorButton.svelte';
-	import OrderByColorAndSequentialButton from './OrderByValueAndSequentialButton.svelte';
-	import OrderByNumberButton from './OrderByNumberButton.svelte';
+	import OrderByValueAndSequentialButton from './OrderByValueAndSequentialButton.svelte';
+	import OrderByValueButton from './OrderByValueButton.svelte';
 	import CardDropTarget from '$lib/components/CardDropTarget.svelte';
-	import { getCardSizeContext } from '$lib/domain/cards';
+	import { getCardSizeContext, type RealCardData } from '$lib/domain/cards';
 	import { resizeObserver } from '$lib/actions/resizeObserver.svelte';
 
 	const { cards }: { cards: readonly UserCard[] } = $props();
@@ -38,26 +38,55 @@
 		return itemsPerRow * rows;
 	});
 
-	const cardsAndDropTargets: UserCard[] = $derived([
-		...cards,
-		...Array(Math.max(totalItems - cards.length, 0)).fill(null)
-	]);
+	type CardOrDropTarget =
+		| {
+				isDropTarget: true;
+				card: null;
+				id: string;
+		  }
+		| {
+				isDropTarget: false;
+				card: RealCardData;
+				id: number;
+		  };
+
+	const cardsAndDropTargets: CardOrDropTarget[] = $derived.by(() => {
+		return [...cards, ...Array(Math.max(totalItems - cards.length, 0)).fill(null)].map(
+			(cardOrNull, index): CardOrDropTarget => {
+				if (cardOrNull === null) {
+					return {
+						isDropTarget: true,
+						card: null,
+						id: `drop-target-${index}`
+					};
+				}
+
+				return {
+					isDropTarget: false,
+					card: cardOrNull,
+					id: cardOrNull.id
+				};
+			}
+		);
+	});
+
+	$inspect(cardsAndDropTargets);
 </script>
 
 <div class="user-cards-container" use:resizeObserver onelementresize={handleResize}>
 	<div class="user-cards">
-		{#each cardsAndDropTargets as card, index}
-			{#if card === null}
+		{#each cardsAndDropTargets as cardOrDropTarget, index (cardOrDropTarget.id)}
+			{#if cardOrDropTarget.isDropTarget}
 				<CardDropTarget {index} {height} {width} dropTargetWidth="{itemWidth + 6}px" />
 			{:else}
-				<DragabbleCard cardData={card} draggedFrom={null} />
+				<DragabbleCard cardData={cardOrDropTarget.card} draggedFrom={null} />
 			{/if}
 		{/each}
 	</div>
 	<div class="user-cards-order-buttons">
-		<OrderByNumberButton />
 		<OrderByColorButton />
-		<OrderByColorAndSequentialButton />
+		<OrderByValueButton />
+		<OrderByValueAndSequentialButton />
 	</div>
 </div>
 

@@ -32,6 +32,14 @@ export type RealJokerCardData = BaseCardData & BaseRealCardData & {
 export type RealCardData = RealNumberCardData | RealJokerCardData;
 export type CardData = NumberCardData | RealCardData;
 
+export function isRealNumberCardData(card: CardData): card is RealNumberCardData {
+    if (card.type === 'joker') {
+        return false;
+    }
+
+    return 'id' in card;
+}
+
 export function getCssCardColor(cardData: CardData) {
     switch (cardData.type) {
         case 'number':
