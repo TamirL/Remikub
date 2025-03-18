@@ -1,30 +1,74 @@
 <script lang="ts">
 	import Card from '$lib/components/Card.svelte';
 	import type { CardSlotData } from '$lib/domain/board';
-	import { allCardsById, canPutRealCardOnSlot, getCardDragDropContext } from '$lib/domain/cards';
+	import {
+		allCardsById,
+		canPutRealCardOnSlot,
+		cardDragDropContext,
+		type DraggedCardData
+	} from '$lib/domain/cards';
 	import { getGameContext } from '$lib/domain/game';
-	import DragabbleCard from '$lib/components/DragabbleCard.svelte';
-	import DragDropDropArea from '$lib/components/DragDropDropArea.svelte';
+	import { dndzone, type Options, type DndEvent, TRIGGERS } from 'svelte-dnd-action';
+	import { untrack } from 'svelte';
 
 	const { slot }: { slot: CardSlotData } = $props();
-	const dragDropContext = getCardDragDropContext();
+	const dragDropContext = cardDragDropContext.get();
 	const gameContext = getGameContext();
 
-	const amIAvailableForDraggedCard = $derived(
+	function getItemsFromSlotData(slot: CardSlotData): DraggedCardData[] {
+		return slot.cardId
+			? [{ id: slot.cardId, draggedCard: allCardsById.get(slot.cardId)!, draggedFromSlot: slot }]
+			: [];
+	}
+
+	let items: DraggedCardData[] = $state(getItemsFromSlotData(slot));
+
+	$effect(() => {
+		const newItems = getItemsFromSlotData(slot);
+		untrack(() => (items = newItems));
+	});
+
+	const amIAvailableForAnyDraggedCard = $derived(
 		gameContext.gameManager.isItMyTurn &&
 			(!slot.cardId ||
-				(!!dragDropContext.draggedCard && slot.cardId === dragDropContext.draggedCard.id))
+				(!!dragDropContext.current && slot.cardId === dragDropContext.current.draggedCard.id))
 	);
 
 	const isMatchingCardDragged = $derived(
-		!!dragDropContext.draggedCard &&
-			canPutRealCardOnSlot(dragDropContext.draggedCard, slot.expectedCard)
+		!!dragDropContext.current &&
+			canPutRealCardOnSlot(dragDropContext.current.draggedCard, slot.expectedCard)
 	);
 
-	const highlight = $derived(amIAvailableForDraggedCard && isMatchingCardDragged);
+	const highlight = $derived(amIAvailableForAnyDraggedCard && isMatchingCardDragged);
 
-	function handleDrop() {
-		if (!dragDropContext.draggedCard) {
+	function onConsider(e: CustomEvent<DndEvent<DraggedCardData>>) {
+		console.log('Slot onConsider', { detail: e.detail });
+		items = e.detail.items;
+
+		if (e.detail.info.trigger == TRIGGERS.DRAG_STARTED) {
+			dragDropContext.current = e.detail.items[0];
+		}
+	}
+
+	function onFinalized(e: CustomEvent<DndEvent<DraggedCardData>>) {
+		console.log('Slot onFinalized', { detail: e.detail });
+
+		resetItemsState();
+
+		if (e.detail.info.trigger === TRIGGERS.DROPPED_OUTSIDE_OF_ANY) {
+			dragDropContext.current = null;
+			return;
+		}
+
+		if (e.detail.info.trigger !== TRIGGERS.DROPPED_INTO_ZONE) {
+			return;
+		}
+
+		const dragDropContextData = dragDropContext.current;
+
+		dragDropContext.current = null;
+
+		if (!dragDropContextData) {
 			console.error('No card to drop');
 			return;
 		}
@@ -34,40 +78,61 @@
 			return;
 		}
 
-		if (dragDropContext.draggedFrom) {
-			gameContext.gameManager.moveCardFromSlot(dragDropContext.draggedFrom, slot);
+		if (dragDropContextData.draggedFromSlot) {
+			gameContext.gameManager.moveCardFromSlot(dragDropContextData.draggedFromSlot, slot);
 		} else {
-			gameContext.gameManager.moveCardFromUserCards(dragDropContext.draggedCard, slot);
+			gameContext.gameManager.moveCardFromUserCards(dragDropContextData.draggedCard, slot);
 		}
 	}
+
+	function resetItemsState() {
+		items = getItemsFromSlotData(slot);
+	}
+
+	const options: Options<DraggedCardData> = $derived({
+		items,
+		dropFromOthersDisabled: !highlight,
+		flipDurationMs: 0,
+		dragDisabled: slot.cardId === null
+		// dropTargetClasses: ['matching-card-over']
+	});
 </script>
 
-<DragDropDropArea
-	isAnyElementDragged={!!dragDropContext.draggedCard}
-	onElementDropped={handleDrop}
-	disableDragDrop={!gameContext.gameManager.isItMyTurn}
->
-	{#snippet content(isCardOverThisSlot)}
-		<div
-			class={[
-				highlight ? 'highlighted' : '',
-				amIAvailableForDraggedCard && isMatchingCardDragged && isCardOverThisSlot
-					? 'matching-card-over'
-					: ''
-			]}
-		>
-			{#if slot.cardId && allCardsById.has(slot.cardId)}
-				<DragabbleCard cardData={allCardsById.get(slot.cardId)!} draggedFrom={slot} />
-			{:else}
-				<div style:opacity={0.2}>
-					<Card cardData={slot.expectedCard} />
-				</div>
-			{/if}
-		</div>
-	{/snippet}
-</DragDropDropArea>
+<div class="card-slot">
+	<div class="card-placeholder">
+		<Card cardData={slot.expectedCard} />
+	</div>
+	<div use:dndzone={options} onconsider={onConsider} onfinalize={onFinalized}>
+		{#each items as item (item.id)}
+			<div class={[highlight ? 'highlighted' : '']}>
+				<Card cardData={slot.expectedCard} />
+			</div>
+		{/each}
+	</div>
+</div>
 
 <style>
+	.card-slot {
+		display: grid;
+		grid-template-columns: 1fr;
+		grid-template-rows: 1fr;
+
+		& > * {
+			grid-column: 1;
+			grid-row: 1;
+		}
+	}
+
+	.card-placeholder {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		opacity: 0.2;
+
+		/* The placeholder is not interactive */
+		pointer-events: none;
+	}
+
 	.highlighted {
 		outline: 2px solid rgba(255, 255, 0, 0);
 		animation: glow 1.5s ease-in-out infinite alternate;

@@ -30,13 +30,11 @@ export function isBoardEmpty(board: Board): boolean {
 export function hasUserMadeContributionsToTheTable(currentCards: RelevantCardsForPlayerTurn, cardsAtTheStartOfTheTurn: RelevantCardsForPlayerTurn | null): boolean {
     // This parameter should always be provided when this is the turn of the player
     if (!cardsAtTheStartOfTheTurn) {
-        console.log("hasUserMadeContributionsToTheTable cardsAtTheStartOfTheTurn", cardsAtTheStartOfTheTurn);
         return !isBoardEmpty(currentCards.board);
     }
 
     // Check the player has less cards in their hand than they did at the start of the turn
     if (currentCards.playerCardIds.length >= cardsAtTheStartOfTheTurn.playerCardIds.length) {
-        console.log("hasUserMadeContributionsToTheTable currentCards.playerCardIds.length", currentCards.playerCardIds, cardsAtTheStartOfTheTurn.playerCardIds);
         return false;
     }
 
@@ -44,7 +42,6 @@ export function hasUserMadeContributionsToTheTable(currentCards: RelevantCardsFo
 
     // Check no cards were moved from the board to the player hand
     if (!new Set(allBoardCardsAtTheStartOfTheTurn).isDisjointFrom(new Set(currentCards.playerCardIds))) {
-        console.log("hasUserMadeContributionsToTheTable sets", new Set(allBoardCardsAtTheStartOfTheTurn), new Set(currentCards.playerCardIds));
         return false;
     }
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { setCardSizeContext } from '$lib/domain/cards';
+	import { cardSizeContext } from '$lib/domain/cards';
 	import { setGameContext, type GameFromPlayerPerspective } from '$lib/domain/game';
 	import GameManager from '$lib/domain/managers/gameManager.svelte';
 	import UpdateManager from '$lib/domain/managers/updateManager.svelte';
@@ -9,7 +9,7 @@
 
 	const widthInPixels = 40;
 	const heightInPixels = widthInPixels * 1.41;
-	setCardSizeContext({
+	cardSizeContext.init({
 		widthPx: widthInPixels,
 		width: `${widthInPixels}px`,
 		heightPx: heightInPixels,

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getCardSizeContext, getCssCardColor, type CardData } from '$lib/domain/cards';
+	import { cardSizeContext, getCssCardColor, type CardData } from '$lib/domain/cards';
 	import cardTileImage from '$lib/assets/card-tile.webp';
 	import jokerCardRedImage from '$lib/assets/joker-red.webp';
 	import jokerCardBlackImage from '$lib/assets/joker-black.webp';
@@ -7,7 +7,7 @@
 	let { cardData }: { cardData: CardData } = $props();
 	let cardColor = getCssCardColor(cardData);
 
-	let { width, height } = getCardSizeContext();
+	let { width, height } = cardSizeContext.get().current;
 </script>
 
 <div

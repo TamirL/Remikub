@@ -1,33 +1,84 @@
 <script lang="ts">
-	import { getCardDragDropContext } from '$lib/domain/cards';
+	import { cardDragDropContext, type DraggedCardData, type RealCardData } from '$lib/domain/cards';
 	import { getGameContext } from '$lib/domain/game';
 	import type { ReorderUserCardsAction } from '$lib/domain/gameActions';
-	import { joinArrayWithNull } from '$lib/utils/arrayUtils';
-	import DragDropDropArea from './DragDropDropArea.svelte';
-	import { type UserCardsOrdered } from '$lib/domain/userCards';
+	import { dndzone, TRIGGERS, type DndEvent, type Options } from 'svelte-dnd-action';
+	import Card from './Card.svelte';
+	import { untrack } from 'svelte';
 
 	const {
+		cardData,
 		index,
 		dropTargetWidth,
 		width,
 		height
-	}: { index: number; dropTargetWidth: string; width: string; height: string } = $props();
+	}: {
+		cardData: RealCardData | null;
+		index: number;
+		dropTargetWidth: string;
+		width: string;
+		height: string;
+	} = $props();
 
-	const dragDropContext = getCardDragDropContext();
+	const dragDropContext = cardDragDropContext.get();
 	const gameContext = getGameContext();
 
-	let isCardOverThis = $state(false);
-
-	function onElementDragOverChange(isOver: boolean) {
-		isCardOverThis = isOver;
+	function getItemsFromCardData(cardData: RealCardData | null): DraggedCardData[] {
+		return cardData
+			? [
+					{
+						id: cardData.id,
+						draggedCard: cardData,
+						draggedFromUserCardIndex: index
+					}
+				]
+			: [];
 	}
 
-	async function onElementDropped() {
+	let items: DraggedCardData[] = $state<DraggedCardData[]>(getItemsFromCardData(cardData));
+
+	$effect(() => {
+		const newItems = getItemsFromCardData(cardData);
+		untrack(() => (items = newItems));
+	});
+
+	function onConsider(event: CustomEvent<DndEvent<DraggedCardData>>) {
+		console.log('DropTarget onConsider', event.detail);
+		items = event.detail.items;
+
+		if (event.detail.info.trigger === TRIGGERS.DRAG_STARTED) {
+			console.log('DRAG_STARTED', event.detail.items);
+			dragDropContext.current = event.detail.items[0];
+		}
+	}
+
+	async function onFinalized(e: CustomEvent<DndEvent<DraggedCardData>>) {
+		console.log('DropTaget onFinalized', { detail: e.detail, index, cardData });
+
+		resetItemsState();
+
+		if (e.detail.info.trigger === TRIGGERS.DROPPED_OUTSIDE_OF_ANY) {
+			dragDropContext.current = null;
+			return;
+		}
+
+		if (e.detail.info.trigger !== TRIGGERS.DROPPED_INTO_ZONE) {
+			return;
+		}
+
+		const dragDropContextData = dragDropContext.current;
+
+		if (!dragDropContextData) {
+			return;
+		}
+
+		dragDropContext.current = null;
+
 		const userCards = gameContext.gameManager.userCards;
 
 		const userCardsUpdated = [...userCards];
 		const indexOfDraggedCard = userCardsUpdated.findIndex(
-			(userCard) => userCard?.id === dragDropContext.draggedCard?.id
+			(userCard) => userCard?.id === dragDropContextData.draggedCard.id
 		);
 
 		[userCardsUpdated[index], userCardsUpdated[indexOfDraggedCard]] = [
@@ -39,6 +90,8 @@
 			cardIdsNewOrder: userCardsUpdated.map((card) => card?.id ?? null)
 		};
 
+		console.log('drop target drop', { before: userCards, after: userCardsUpdated });
+
 		await fetch(`/api/game/${gameContext.gameManager.gameId}/user-cards`, {
 			method: 'POST',
 			headers: {
@@ -47,18 +100,31 @@
 			body: JSON.stringify(requestBody)
 		});
 	}
+
+	function resetItemsState() {
+		items = getItemsFromCardData(cardData);
+	}
+
+	const dndOptions: Options<DraggedCardData> = $derived({
+		items,
+		dropFromOthersDisabled: !!cardData
+		// dropTargetClasses: ['card-over-me']
+	});
 </script>
 
-<div
-	class={['visible-box', isCardOverThis && 'card-over-me']}
-	style="--visible-box-width: {width}; --visible-box-height: {height}"
->
-	<div class="drop-target" style="--drop-target-width: {dropTargetWidth}">
-		<DragDropDropArea
-			isAnyElementDragged={!!dragDropContext.draggedCard}
-			{onElementDropped}
-			{onElementDragOverChange}
-		/>
+<div class={['visible-box']} style="--visible-box-width: {width}; --visible-box-height: {height}">
+	<div
+		class="drop-target"
+		style="--drop-target-width: {dropTargetWidth}"
+		use:dndzone={dndOptions}
+		onconsider={onConsider}
+		onfinalize={onFinalized}
+	>
+		{#each items as item (item.id)}
+			<div>
+				<Card cardData={item.draggedCard} />
+			</div>
+		{/each}
 	</div>
 </div>
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { setCardDragDropContext } from '$lib/domain/cards';
+	import { cardDragDropContext } from '$lib/domain/cards';
 	import Board from './Board.svelte';
 	import UserCards from './UserCards.svelte';
 	import { getGameContext } from '$lib/domain/game';
@@ -11,8 +11,7 @@
 	import PlayersPanel from '$lib/components/PlayersPanel.svelte';
 	import { isDefined } from '$lib/utils/utils';
 
-	const dragDropContext = $state({ draggedCard: null, draggedFrom: null });
-	setCardDragDropContext(dragDropContext);
+	cardDragDropContext.init(null);
 	const gameContext = getGameContext();
 
 	const canFinishTurn = $derived.by(() => {

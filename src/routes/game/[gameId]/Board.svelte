@@ -1,14 +1,15 @@
 <script lang="ts">
 	import type { CardSlotData } from '$lib/domain/board';
-	import { getCardDragDropContext } from '$lib/domain/cards';
+	import { cardDragDropContext } from '$lib/domain/cards';
 	import { getGameContext } from '$lib/domain/game';
 	import CardSlot from './CardSlot.svelte';
 
 	let gameManager = getGameContext().gameManager;
+	const dragDropContext = cardDragDropContext.get();
 
 	const minimalVisibleBoard = $derived(
-		getGameContext().gameManager.getMinimalVisibleBoard(
-			gameManager.isItMyTurn ? getCardDragDropContext().draggedCard : null
+		gameManager.getMinimalVisibleBoard(
+			gameManager.isItMyTurn ? (dragDropContext.current?.draggedCard ?? null) : null
 		)
 	);
 

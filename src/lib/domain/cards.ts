@@ -2,6 +2,8 @@ import { getContext, setContext } from "svelte";
 import type { CardSlotData } from "./board";
 import { compare, type Comparator } from "$lib/utils/comparatorUtils";
 import { createIdGenerator } from "$lib/utils/idGenerator";
+import type { SHADOW_ITEM_MARKER_PROPERTY_NAME } from "svelte-dnd-action";
+import { CustomContext } from "$lib/context.svelte";
 
 export type CardType = 'number' | 'joker';
 export type NumberCardColor = 'red' | 'blue' | 'yellow' | 'black';
@@ -79,26 +81,25 @@ type CardSize = {
     heightPx: number;
 }
 
-export function setCardSizeContext(size: CardSize) {
-    setContext('CardSize', size);
+export const cardSizeContext = new CustomContext<CardSize>('CardSize');
+
+export type DraggedCardData = {
+    // We should set it with the id of the card, but the drag drop infra can set it to anything
+    id: unknown;
+    draggedCard: RealCardData;
+    draggedFromSlot: CardSlotData;
+    draggedFromUserCardIndex?: undefined;
+    [SHADOW_ITEM_MARKER_PROPERTY_NAME]?: boolean;
+} | {
+    // We should set it with the id of the card, but the drag drop infra can set it to anything
+    id: unknown;
+    draggedCard: RealCardData;
+    draggedFromSlot?: undefined;
+    draggedFromUserCardIndex: number;
+    [SHADOW_ITEM_MARKER_PROPERTY_NAME]?: boolean;
 }
 
-export function getCardSizeContext() {
-    return getContext('CardSize') as CardSize;
-}
-
-type CardDragDropContextData = {
-    draggedCard: RealCardData | null;
-    draggedFrom: CardSlotData | null;
-}
-
-export function setCardDragDropContext(dragDropInitialContext: CardDragDropContextData) {
-    setContext('CardDragDrop', dragDropInitialContext);
-}
-
-export function getCardDragDropContext(): CardDragDropContextData {
-    return getContext('CardDragDrop') as CardDragDropContextData;
-}
+export const cardDragDropContext = new CustomContext<null | DraggedCardData>('CardDragDrop');
 
 export function canPutRealCardOnSlot(realCard: RealCardData, cardSlot: NumberCardData) {
     switch (realCard.type) {

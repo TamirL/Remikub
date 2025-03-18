@@ -1,16 +1,15 @@
 <script lang="ts">
 	import type { UserCard } from '$lib/domain/userCards';
-	import DragabbleCard from '$lib/components/DragabbleCard.svelte';
 	import OrderByColorButton from './OrderByColorButton.svelte';
 	import OrderByValueAndSequentialButton from './OrderByValueAndSequentialButton.svelte';
 	import OrderByValueButton from './OrderByValueButton.svelte';
 	import CardDropTarget from '$lib/components/CardDropTarget.svelte';
-	import { getCardSizeContext, type RealCardData } from '$lib/domain/cards';
-	import { resizeObserver } from '$lib/actions/resizeObserver.svelte';
+	import { cardSizeContext, type RealCardData } from '$lib/domain/cards';
+	import { sizeObserver } from '$lib/actions/sizeObserver.svelte';
 
 	const { cards }: { cards: readonly UserCard[] } = $props();
 
-	const { width, widthPx: itemWidth, height, heightPx: itemHeight } = getCardSizeContext();
+	const { width, widthPx: itemWidth, height, heightPx: itemHeight } = cardSizeContext.get().current;
 
 	let containerWidth = $state(0);
 	let containerHeight = $state(0);
@@ -26,61 +25,48 @@
 		const paddingTop = 10,
 			paddingBottom = 10;
 
-		const gap = 10; // gap between items
+		const rowGap = 10; // gap between items
+		const columnGap = 6; // gap between items
 
 		// Calculate effective dimensions
 		const effectiveWidth = containerWidth - (paddingLeft + paddingRight);
 		const effectiveHeight = containerHeight - (paddingTop + paddingBottom);
 
 		// Calculate how many items fit per row and per column
-		const itemsPerRow = Math.floor((effectiveWidth + gap) / (itemWidth + gap));
-		const rows = Math.floor((effectiveHeight + gap) / (itemHeight + gap));
-		return itemsPerRow * rows;
+		const itemsPerRow = Math.floor((effectiveWidth + columnGap) / (itemWidth + columnGap));
+		const rows = Math.floor((effectiveHeight + rowGap) / (itemHeight + rowGap));
+
+		return Math.max(itemsPerRow * rows, cards.length);
 	});
 
-	type CardOrDropTarget =
-		| {
-				isDropTarget: true;
-				card: null;
-				id: string;
-		  }
-		| {
-				isDropTarget: false;
-				card: RealCardData;
-				id: number;
-		  };
+	type CardOrDropTarget = {
+		card: RealCardData | null;
+		id: number | string;
+	};
 
 	const cardsAndDropTargets: CardOrDropTarget[] = $derived.by(() => {
-		return [...cards, ...Array(Math.max(totalItems - cards.length, 0)).fill(null)].map(
-			(cardOrNull, index): CardOrDropTarget => {
-				if (cardOrNull === null) {
-					return {
-						isDropTarget: true,
-						card: null,
-						id: `drop-target-${index}`
-					};
-				}
-
-				return {
-					isDropTarget: false,
-					card: cardOrNull,
-					id: cardOrNull.id
-				};
-			}
-		);
+		return [
+			...cards,
+			...(Array(Math.max(totalItems - cards.length, 0)).fill(null) as UserCard[])
+		].map((cardOrNull, index): CardOrDropTarget => {
+			return {
+				card: cardOrNull,
+				id: cardOrNull?.id ?? `drop-target-${index}`
+			};
+		});
 	});
-
-	$inspect(cardsAndDropTargets);
 </script>
 
-<div class="user-cards-container" use:resizeObserver onelementresize={handleResize}>
-	<div class="user-cards">
+<div class="user-cards-container">
+	<div class="user-cards" onelementresize={handleResize} use:sizeObserver>
 		{#each cardsAndDropTargets as cardOrDropTarget, index (cardOrDropTarget.id)}
-			{#if cardOrDropTarget.isDropTarget}
-				<CardDropTarget {index} {height} {width} dropTargetWidth="{itemWidth + 6}px" />
-			{:else}
-				<DragabbleCard cardData={cardOrDropTarget.card} draggedFrom={null} />
-			{/if}
+			<CardDropTarget
+				{index}
+				{height}
+				{width}
+				cardData={cardOrDropTarget.card}
+				dropTargetWidth="{itemWidth + 6}px"
+			/>
 		{/each}
 	</div>
 	<div class="user-cards-order-buttons">

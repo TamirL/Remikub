@@ -117,25 +117,6 @@ class GameManager {
 
         const { sets: numberGroupSets, otherCards: cardsThatAreNotSets } = extractNumberGroups(cardsThatAreNotRuns);
 
-        console.log('data', {
-            userCards: this.userCards,
-            allUserCards,
-            runsSets,
-            cardsThatAreNotRuns,
-            numberGroupSets,
-            cardsThatAreNotSets,
-        });
-
-        console.log('result', orderUserCardsBySameComparator(
-            {
-                sets: [...runsSets, ...numberGroupSets],
-                otherCards: cardsThatAreNotSets
-            },
-            cardByTypeComperator
-                .then(cardByColorComparator)
-                .then(cardByValueComparator)
-        ));
-
         return orderUserCardsBySameComparator(
             {
                 sets: [...numberGroupSets, ...runsSets],
