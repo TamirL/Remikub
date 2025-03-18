@@ -44,6 +44,8 @@ export const actions = {
 
         storeGame(updatedGame);
         broadcastGameLobbyUpdate('game-started', updatedGame);
+
+        redirect(303, `/game/${game.id}`);
     },
 };
 
