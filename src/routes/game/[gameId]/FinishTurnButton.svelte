@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import Button from '$lib/components/Button.svelte';
-	import { hasUserMadeContributionsToTheTable } from '$lib/domain/board';
+	import { hasUserMadeContributionsToTheBoard } from '$lib/domain/board';
 	import { getGameContext } from '$lib/domain/game';
 	import { isDefined } from '$lib/utils/utils';
 
 	const gameContext = getGameContext();
 
 	const hasPlayerMadeContributions = $derived.by(() =>
-		hasUserMadeContributionsToTheTable(
+		hasUserMadeContributionsToTheBoard(
 			{
 				board: gameContext.gameManager.board,
 				playerCardIds: gameContext.gameManager.userCards.filter(isDefined).map((p) => p.id)

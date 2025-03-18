@@ -5,7 +5,7 @@
 	import { getGameContext } from '$lib/domain/game';
 	import PlayerCard from '$lib/components/PlayerCard.svelte';
 	import UndoBoardChangesButton from './UndoBoardChangesButton.svelte';
-	import { areBoardsEqual, hasUserMadeContributionsToTheTable } from '$lib/domain/board';
+	import { areBoardsEqual, hasUserMadeContributionsToTheBoard } from '$lib/domain/board';
 	import FinishTurnButton from './FinishTurnButton.svelte';
 	import DrawCardButton from './DrawCardButton.svelte';
 	import PlayersPanel from '$lib/components/PlayersPanel.svelte';
@@ -23,7 +23,7 @@
 			return false;
 		}
 
-		const hasUserMadeContributions = hasUserMadeContributionsToTheTable(
+		const hasUserMadeContributions = hasUserMadeContributionsToTheBoard(
 			{
 				board: gameContext.gameManager.board,
 				playerCardIds: gameContext.gameManager.userCards.filter(isDefined).map((p) => p.id)

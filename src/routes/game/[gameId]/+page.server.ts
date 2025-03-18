@@ -4,7 +4,7 @@ import { storeGame } from '$lib/server/storage/game';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { broadcastGameUpdate } from '../../api/game/[gameId]/updates/gameUpdatePusher';
-import { hasUserMadeContributionsToTheTable } from '$lib/domain/board';
+import { hasUserMadeContributionsToTheBoard } from '$lib/domain/board';
 import { updatePlayersData } from '$lib/server/domain/players';
 import { isDefined } from '$lib/utils/utils';
 import { isSetsEqual } from '$lib/utils/setUtils';
@@ -36,7 +36,7 @@ export const actions = {
             throw error(400, 'Board is not valid');
         }
 
-        if (!hasUserMadeContributionsToTheTable({ board: game.board, playerCardIds: currentPlayer.userCardsIds.filter(isDefined) }, game.beforePlayerChangesData)) {
+        if (!hasUserMadeContributionsToTheBoard({ board: game.board, playerCardIds: currentPlayer.userCardsIds.filter(isDefined) }, game.beforePlayerChangesData)) {
             throw error(400, 'You have not made any contributions to the table');
         }
 

@@ -27,7 +27,7 @@ export function isBoardEmpty(board: Board): boolean {
         board.runs.every(run => run.slots.every(slot => slot.cardId === null));
 }
 
-export function hasUserMadeContributionsToTheTable(currentCards: RelevantCardsForPlayerTurn, cardsAtTheStartOfTheTurn: RelevantCardsForPlayerTurn | null): boolean {
+export function hasUserMadeContributionsToTheBoard(currentCards: RelevantCardsForPlayerTurn, cardsAtTheStartOfTheTurn: RelevantCardsForPlayerTurn | null): boolean {
     // This parameter should always be provided when this is the turn of the player
     if (!cardsAtTheStartOfTheTurn) {
         return !isBoardEmpty(currentCards.board);
@@ -46,6 +46,15 @@ export function hasUserMadeContributionsToTheTable(currentCards: RelevantCardsFo
     }
 
     return true;
+}
+
+export function hasUserMadeChangesToTheBoard(currentCards: RelevantCardsForPlayerTurn, cardsAtTheStartOfTheTurn: RelevantCardsForPlayerTurn | null): boolean {
+    // This parameter should always be provided when this is the turn of the player
+    if (!cardsAtTheStartOfTheTurn) {
+        return !isBoardEmpty(currentCards.board);
+    }
+
+    return !areBoardsEqual(currentCards.board, cardsAtTheStartOfTheTurn.board);
 }
 
 export function areBoardsEqual(board1: Board, board2: Board): boolean {
